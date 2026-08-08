@@ -1593,4 +1593,4 @@ end)
 
 --// Initial Setup
 print("[ShadowFollow] Loaded successfully. Author: Grow_Jandle")
-print("[ShadowFollow] Version 2.0 - Glassmorphism UI with Maximal Pathfinding"
+print("[ShadowFollow] Version 2.0 - Glassmorphism UI with Maximal Pathfinding")
