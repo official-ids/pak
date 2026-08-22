@@ -10,11 +10,11 @@ local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- 1. Очистка старого лоадера (если был запущен дважды)
+-- Очистка старого лоадера
 local oldLoader = PlayerGui:FindFirstChild("WinionLoaderUI")
 if oldLoader then oldLoader:Destroy() end
 
--- 2. Создание UI Лоадера
+-- Создание UI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "WinionLoaderUI"
 ScreenGui.ResetOnSpawn = false
@@ -51,7 +51,7 @@ local Status = Instance.new("TextLabel")
 Status.Size = UDim2.new(1, 0, 0, 30)
 Status.Position = UDim2.new(0, 0, 0, 35)
 Status.BackgroundTransparency = 1
-Status.Text = "Подключение к репозиторию..."
+Status.Text = "Инициализация..."
 Status.TextColor3 = Color3.fromRGB(160, 160, 170)
 Status.Font = Enum.Font.Gotham
 Status.TextSize = 14
@@ -67,70 +67,68 @@ Instance.new("UICorner", ProgressBg).CornerRadius = UDim.new(1, 0)
 
 local ProgressBar = Instance.new("Frame")
 ProgressBar.Size = UDim2.new(0, 0, 1, 0)
-ProgressBar.BackgroundColor3 = Color3.fromRGB(80, 120, 255) -- Акцентный цвет
+ProgressBar.BackgroundColor3 = Color3.fromRGB(80, 120, 255)
 ProgressBar.BorderSizePixel = 0
 ProgressBar.Parent = ProgressBg
 Instance.new("UICorner", ProgressBar).CornerRadius = UDim.new(1, 0)
 
--- 3. Логика загрузки
+-- Логика загрузки с гарантированной задержкой для отображения UI
 task.spawn(function()
-    -- Анимация "ожидания" пока идет запрос
-    for i = 0, 70, 5 do
-        if not ScreenGui.Parent then break end
-        TweenService:Create(ProgressBar, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {
-            Size = UDim2.new(i / 100, 0, 1, 0)
-        }):Play()
-        task.wait(0.05)
-    end
-
-    -- Попытка получить скрипт
+    -- 1. Гарантированно показываем UI минимум 1.2 секунды
+    TweenService:Create(ProgressBar, TweenInfo.new(1.2, Enum.EasingStyle.Quad), {
+        Size = UDim2.new(0.4, 0, 1, 0)
+    }):Play()
+    task.wait(1.2)
+    
+    Status.Text = "Загрузка скрипта..."
+    
+    -- 2. Запрос к GitHub
     local success, result = pcall(function()
-        return game:HttpGet(SCRIPT_URL, true) -- true обходит некоторые фильтры Roblox для raw-ссылок
+        return game:HttpGet(SCRIPT_URL, true)
     end)
 
     if success and result and result ~= "" then
-        Status.Text = "Загрузка завершена! Запуск..."
+        Status.Text = "Успешно! Запуск..."
         Status.TextColor3 = Color3.fromRGB(100, 255, 130)
-        TweenService:Create(ProgressBar, TweenInfo.new(0.3), {
+        TweenService:Create(ProgressBar, TweenInfo.new(0.4), {
             Size = UDim2.new(1, 0, 1, 0),
             BackgroundColor3 = Color3.fromRGB(100, 255, 130)
         }):Play()
 
-        task.wait(0.4)
+        task.wait(0.5)
 
-        -- Компиляция и выполнение основного скрипта
+        -- 3. Выполнение
         local func, err = loadstring(result)
         if func then
             func()
         else
-            warn("[Winion Loader] Ошибка компиляции основного скрипта: " .. tostring(err))
             Status.Text = "Ошибка компиляции!"
             Status.TextColor3 = Color3.fromRGB(255, 80, 80)
+            warn("[Winion Loader] Ошибка: " .. tostring(err))
         end
     else
-        warn("[Winion Loader] Не удалось загрузить скрипт. Проверьте интернет или URL.")
-        Status.Text = "Ошибка загрузки!"
+        Status.Text = "Ошибка сети или URL!"
         Status.TextColor3 = Color3.fromRGB(255, 80, 80)
         TweenService:Create(ProgressBar, TweenInfo.new(0.3), {
             BackgroundColor3 = Color3.fromRGB(255, 80, 80)
         }):Play()
     end
 
-    -- 4. Очистка UI лоадера через 1.5 секунды после завершения
+    -- 4. Плавное исчезновение
     task.delay(1.5, function()
         if ScreenGui.Parent then
-            local fadeOut = TweenService:Create(Frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            local fadeOut = TweenService:Create(Frame, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
                 BackgroundTransparency = 1
             })
             fadeOut:Play()
+            
+            TweenService:Create(Title, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+            TweenService:Create(Status, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+            TweenService:Create(Stroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
+            
             fadeOut.Completed:Connect(function()
                 ScreenGui:Destroy()
             end)
-            
-            -- Скрываем текст и обводку для плавности
-            TweenService:Create(Title, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
-            TweenService:Create(Status, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
-            TweenService:Create(Stroke, TweenInfo.new(0.3), {Transparency = 1}):Play()
         end
     end)
 end)
