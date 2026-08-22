@@ -18,7 +18,8 @@ local Services = {
     UserInputService = game:GetService("UserInputService"),
     StarterGui = game:GetService("StarterGui"),
     Lighting = game:GetService("Lighting"),
-    RunService = game:GetService("RunService")
+    RunService = game:GetService("RunService"),
+    HttpService = game:GetService("HttpService")
 }
 
 local LocalPlayer = Services.Players.LocalPlayer
@@ -156,31 +157,33 @@ local CurrentSettings = {
 local SaveSystem = {
     SaveKey = "UIThemeInjector_Settings_v1",
     
-    Save = function()
-        local success, err = pcall(function()
-            local data = HttpService:JSONEncode(CurrentSettings)
-            writefile(SaveSystem.SaveKey, data)
-        end)
-        if not success then
-            warn("[UIThemeInjector] Ошибка сохранения настроек: " .. tostring(err))
+    -- Найдите функцию Save и замените:
+Save = function()
+    local success, err = pcall(function()
+        local data = Services.HttpService:JSONEncode(CurrentSettings)
+        writefile(SaveSystem.SaveKey, data)
+    end)
+    if not success then
+        warn("[UIThemeInjector] Ошибка сохранения настроек: " .. tostring(err))
+    end
+end,
+
+-- И функцию Load:
+Load = function()
+    local success, data = pcall(function()
+        if isfile(SaveSystem.SaveKey) then
+            local fileContent = readfile(SaveSystem.SaveKey)
+            return Services.HttpService:JSONDecode(fileContent)
         end
-    end,
+        return nil
+    end)
     
-    Load = function()
-        local success, data = pcall(function()
-            if isfile(SaveSystem.SaveKey) then
-                local fileContent = readfile(SaveSystem.SaveKey)
-                return HttpService:JSONDecode(fileContent)
-            end
-            return nil
-        end)
-        
-        if success and data then
-            CurrentSettings = data
-            return true
-        end
-        return false
-    end,
+    if success and data then
+        CurrentSettings = data
+        return true
+    end
+    return false
+end,
     
     Reset = function()
         local success = pcall(function()
@@ -876,13 +879,14 @@ GameUITab:CreateToggle({
     end
 })
 
+-- СТАЛО (добавлена проверка на nil):
 GameUITab:CreateInput({
     Name = "Имя целевого фрейма",
-    CurrentValue = CurrentSettings.GameUI.CustomFrames.TargetFrameName,
-    Placeholder = "Например: ShopFrame",
+    CurrentValue = CurrentSettings.GameUI.CustomFrames.TargetFrameName or "",
+    PlaceholderText = "Например: ShopFrame",  -- Изменено с Placeholder на PlaceholderText
     Flag = "TargetFrameName",
     Callback = function(value)
-        CurrentSettings.GameUI.CustomFrames.TargetFrameName = value
+        CurrentSettings.GameUI.CustomFrames.TargetFrameName = value or ""
         SaveSystem.Save()
     end
 })
