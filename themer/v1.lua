@@ -4,85 +4,181 @@
     Автор: Winion (@Winion)
     Назначение: Профессиональная кастомизация интерфейсов Roblox
     Библиотека: Rayfield UI
+    Версия: 2.0.0 (Full Unoptimized Verbose Edition)
+    ====================================================================
+    
+    Данный скрипт предназначен для глубокой и детальной настройки 
+    визуального оформления интерфейсов Roblox. 
+    Код написан в развернутом, неоптимизированном стиле для максимальной 
+    читаемости, простоты модификации и отсутствия скрытых зависимостей.
+    
+    Структура скрипта:
+    1. Подключение библиотеки Rayfield
+    2. Объявление сервисов Roblox
+    3. Конфигурация тем по умолчанию (Пресеты)
+    4. Текущие настройки (Default State)
+    5. Система сохранения и загрузки (File I/O)
+    6. Утилиты для работы с UI (UIUtils)
+    7. Модули кастомизации CoreGui
+    8. Модули кастомизации игровых интерфейсов (GameUI)
+    9. Система применения тем (ThemeSystem)
+    10. Построение интерфейса Rayfield (Window, Tabs, Elements)
+    11. Инициализация и обработчики событий
     ====================================================================
 ]]
 
--- // 1. Подключение Rayfield UI
+-- =========================================================================
+-- 1. ПОДКЛЮЧЕНИЕ БИБЛИОТЕКИ RAYFIELD
+-- =========================================================================
+
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- // 2. Сервисы и переменные
-local Services = {
-    Players = game:GetService("Players"),
-    CoreGui = game:GetService("CoreGui"),
-    TweenService = game:GetService("TweenService"),
-    UserInputService = game:GetService("UserInputService"),
-    StarterGui = game:GetService("StarterGui"),
-    Lighting = game:GetService("Lighting"),
-    RunService = game:GetService("RunService"),
-    Workspace = game:GetService("Workspace"),
-    HttpService = game:GetService("HttpService")
-}
+-- =========================================================================
+-- 2. ОБЪЯВЛЕНИЕ СЕРВИСОВ ROBLOX
+-- =========================================================================
+
+local Services = {}
+
+Services.Players = game:GetService("Players")
+Services.CoreGui = game:GetService("CoreGui")
+Services.TweenService = game:GetService("TweenService")
+Services.UserInputService = game:GetService("UserInputService")
+Services.StarterGui = game:GetService("StarterGui")
+Services.Lighting = game:GetService("Lighting")
+Services.RunService = game:GetService("RunService")
+Services.Workspace = game:GetService("Workspace")
+Services.HttpService = game:GetService("HttpService")
+Services.TextService = game:GetService("TextService")
+Services.MarketplaceService = game:GetService("MarketplaceService")
 
 local LocalPlayer = Services.Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- // 3. Конфигурация тем по умолчанию
-local DefaultThemes = {
-    DarkRed = {
-        Name = "Dark Red Neon",
-        BackgroundColor = Color3.fromRGB(25, 25, 30),
-        AccentColor = Color3.fromRGB(255, 50, 50),
-        TextColor = Color3.fromRGB(255, 255, 255),
-        SecondaryColor = Color3.fromRGB(45, 45, 55),
-        Transparency = 0.1,
-        CornerRadius = 12,
-        Font = Enum.Font.GothamBold
-    },
-    CyberPunk = {
-        Name = "Cyberpunk",
-        BackgroundColor = Color3.fromRGB(20, 20, 35),
-        AccentColor = Color3.fromRGB(0, 255, 255),
-        TextColor = Color3.fromRGB(255, 255, 255),
-        SecondaryColor = Color3.fromRGB(40, 40, 60),
-        Transparency = 0.15,
-        CornerRadius = 8,
-        Font = Enum.Font.Code
-    },
-    Minimalist = {
-        Name = "Minimalist White",
-        BackgroundColor = Color3.fromRGB(250, 250, 250),
-        AccentColor = Color3.fromRGB(0, 120, 215),
-        TextColor = Color3.fromRGB(30, 30, 30),
-        SecondaryColor = Color3.fromRGB(240, 240, 240),
-        Transparency = 0.05,
-        CornerRadius = 4,
-        Font = Enum.Font.Gotham
-    },
-    Matrix = {
-        Name = "Matrix Green",
-        BackgroundColor = Color3.fromRGB(0, 10, 0),
-        AccentColor = Color3.fromRGB(0, 255, 0),
-        TextColor = Color3.fromRGB(0, 255, 0),
-        SecondaryColor = Color3.fromRGB(0, 30, 0),
-        Transparency = 0.2,
-        CornerRadius = 0,
-        Font = Enum.Font.Code
-    },
-    Sunset = {
-        Name = "Sunset Orange",
-        BackgroundColor = Color3.fromRGB(30, 20, 40),
-        AccentColor = Color3.fromRGB(255, 140, 50),
-        TextColor = Color3.fromRGB(255, 255, 255),
-        SecondaryColor = Color3.fromRGB(50, 35, 60),
-        Transparency = 0.1,
-        CornerRadius = 10,
-        Font = Enum.Font.GothamMedium
-    }
+-- =========================================================================
+-- 3. КОНФИГУРАЦИЯ ТЕМ ПО УМОЛЧАНИЮ (ПРЕСЕТЫ)
+-- =========================================================================
+
+local DefaultThemes = {}
+
+DefaultThemes.DarkRed = {
+    Name = "Dark Red Neon",
+    BackgroundColor = Color3.fromRGB(25, 25, 30),
+    AccentColor = Color3.fromRGB(255, 50, 50),
+    TextColor = Color3.fromRGB(255, 255, 255),
+    SecondaryColor = Color3.fromRGB(45, 45, 55),
+    Transparency = 0.1,
+    CornerRadius = 12,
+    Font = Enum.Font.GothamBold
 }
 
--- // 4. Текущие настройки (загружаются из сохранений или defaults)
+DefaultThemes.CyberPunk = {
+    Name = "Cyberpunk",
+    BackgroundColor = Color3.fromRGB(20, 20, 35),
+    AccentColor = Color3.fromRGB(0, 255, 255),
+    TextColor = Color3.fromRGB(255, 255, 255),
+    SecondaryColor = Color3.fromRGB(40, 40, 60),
+    Transparency = 0.15,
+    CornerRadius = 8,
+    Font = Enum.Font.Code
+}
+
+DefaultThemes.Minimalist = {
+    Name = "Minimalist White",
+    BackgroundColor = Color3.fromRGB(250, 250, 250),
+    AccentColor = Color3.fromRGB(0, 120, 215),
+    TextColor = Color3.fromRGB(30, 30, 30),
+    SecondaryColor = Color3.fromRGB(240, 240, 240),
+    Transparency = 0.05,
+    CornerRadius = 4,
+    Font = Enum.Font.Gotham
+}
+
+DefaultThemes.Matrix = {
+    Name = "Matrix Green",
+    BackgroundColor = Color3.fromRGB(0, 10, 0),
+    AccentColor = Color3.fromRGB(0, 255, 0),
+    TextColor = Color3.fromRGB(0, 255, 0),
+    SecondaryColor = Color3.fromRGB(0, 30, 0),
+    Transparency = 0.2,
+    CornerRadius = 0,
+    Font = Enum.Font.Code
+}
+
+DefaultThemes.Sunset = {
+    Name = "Sunset Orange",
+    BackgroundColor = Color3.fromRGB(30, 20, 40),
+    AccentColor = Color3.fromRGB(255, 140, 50),
+    TextColor = Color3.fromRGB(255, 255, 255),
+    SecondaryColor = Color3.fromRGB(50, 35, 60),
+    Transparency = 0.1,
+    CornerRadius = 10,
+    Font = Enum.Font.GothamMedium
+}
+
+DefaultThemes.OceanBlue = {
+    Name = "Ocean Blue",
+    BackgroundColor = Color3.fromRGB(10, 20, 40),
+    AccentColor = Color3.fromRGB(0, 150, 255),
+    TextColor = Color3.fromRGB(200, 230, 255),
+    SecondaryColor = Color3.fromRGB(20, 40, 70),
+    Transparency = 0.12,
+    CornerRadius = 14,
+    Font = Enum.Font.Gotham
+}
+
+DefaultThemes.ForestGreen = {
+    Name = "Forest Green",
+    BackgroundColor = Color3.fromRGB(15, 30, 15),
+    AccentColor = Color3.fromRGB(50, 205, 50),
+    TextColor = Color3.fromRGB(220, 255, 220),
+    SecondaryColor = Color3.fromRGB(30, 60, 30),
+    Transparency = 0.15,
+    CornerRadius = 6,
+    Font = Enum.Font.GothamMedium
+}
+
+DefaultThemes.MidnightPurple = {
+    Name = "Midnight Purple",
+    BackgroundColor = Color3.fromRGB(20, 10, 30),
+    AccentColor = Color3.fromRGB(180, 50, 255),
+    TextColor = Color3.fromRGB(240, 220, 255),
+    SecondaryColor = Color3.fromRGB(40, 20, 60),
+    Transparency = 0.18,
+    CornerRadius = 16,
+    Font = Enum.Font.GothamBold
+}
+
+DefaultThemes.GoldenHour = {
+    Name = "Golden Hour",
+    BackgroundColor = Color3.fromRGB(40, 30, 10),
+    AccentColor = Color3.fromRGB(255, 200, 50),
+    TextColor = Color3.fromRGB(255, 240, 200),
+    SecondaryColor = Color3.fromRGB(60, 45, 15),
+    Transparency = 0.08,
+    CornerRadius = 8,
+    Font = Enum.Font.Gotham
+}
+
+DefaultThemes.Monochrome = {
+    Name = "Monochrome",
+    BackgroundColor = Color3.fromRGB(30, 30, 30),
+    AccentColor = Color3.fromRGB(255, 255, 255),
+    TextColor = Color3.fromRGB(255, 255, 255),
+    SecondaryColor = Color3.fromRGB(60, 60, 60),
+    Transparency = 0.0,
+    CornerRadius = 0,
+    Font = Enum.Font.Code
+}
+
+-- =========================================================================
+-- 4. ТЕКУЩИЕ НАСТРОЙКИ (DEFAULT STATE)
+-- =========================================================================
+-- Примечание: Здесь не вызываются функции UIUtils, чтобы избежать ошибок 
+-- порядка инициализации (UIUtils определяется ниже).
+
 local CurrentSettings = {
     ActiveTheme = "DarkRed",
+    
     CoreGui = {
         Chat = {
             Enabled = true,
@@ -111,8 +207,23 @@ local CurrentSettings = {
             BackgroundColor = Color3.fromRGB(40, 40, 40),
             Transparency = 0.2,
             CornerRadius = 4
+        },
+        Leaderboard = {
+            Enabled = true,
+            BackgroundColor = Color3.fromRGB(25, 25, 30),
+            TextColor = Color3.fromRGB(255, 255, 255),
+            Transparency = 0.1,
+            CornerRadius = 8
+        },
+        Notifications = {
+            Enabled = true,
+            BackgroundColor = Color3.fromRGB(25, 25, 30),
+            TextColor = Color3.fromRGB(255, 255, 255),
+            Transparency = 0.15,
+            CornerRadius = 10
         }
     },
+    
     GameUI = {
         CustomFrames = {
             Enabled = false,
@@ -133,8 +244,28 @@ local CurrentSettings = {
             TextColor = Color3.fromRGB(255, 255, 255),
             Font = Enum.Font.GothamBold,
             TextSize = 14
+        },
+        ImageLabels = {
+            Enabled = false,
+            BorderColor = Color3.fromRGB(255, 255, 255),
+            BorderThickness = 0,
+            CornerRadius = 8
+        },
+        ScrollFrames = {
+            Enabled = false,
+            BackgroundColor = Color3.fromRGB(20, 20, 25),
+            Transparency = 0.2,
+            CornerRadius = 6
+        },
+        TextBoxes = {
+            Enabled = false,
+            BackgroundColor = Color3.fromRGB(30, 30, 35),
+            TextColor = Color3.fromRGB(255, 255, 255),
+            Transparency = 0.1,
+            CornerRadius = 6
         }
     },
+    
     Advanced = {
         Glassmorphism = {
             Enabled = true,
@@ -149,74 +280,87 @@ local CurrentSettings = {
         Responsive = {
             Enabled = true,
             MobileScale = 0.8,
+            TabletScale = 0.9,
             DesktopScale = 1.0
+        },
+        Logging = {
+            Enabled = true,
+            PrintToOutput = true,
+            PrintToConsole = false
         }
     }
 }
 
--- Функция для получения масштаба (вызывается после определения UIUtils)
-local function GetInitialScaleFactor()
-    local success, result = pcall(function()
-        local camera = Services.Workspace.CurrentCamera
-        if not camera then return 1.0 end
-        local viewportSize = camera.ViewportSize
-        if viewportSize.X < 800 then
-            return CurrentSettings.Advanced.Responsive.MobileScale
-        else
-            return CurrentSettings.Advanced.Responsive.DesktopScale
-        end
-    end)
-    return success and result or 1.0
+-- =========================================================================
+-- 5. СИСТЕМА СОХРАНЕНИЯ И ЗАГРУЗКИ (FILE I/O)
+-- =========================================================================
+
+local SaveSystem = {}
+SaveSystem.SaveKey = "UIThemeInjector_Settings_v2.json"
+
+SaveSystem.Log = function(message)
+    if CurrentSettings.Advanced.Logging.Enabled and CurrentSettings.Advanced.Logging.PrintToOutput then
+        print("[UIThemeInjector] " .. tostring(message))
+    end
 end
 
--- // 5. Система сохранения настроек
-local SaveSystem = {
-    SaveKey = "UIThemeInjector_Settings_v1",
-    
-    -- Найдите функцию Save и замените:
-Save = function()
+SaveSystem.Save = function()
+    SaveSystem.Log("Начало процесса сохранения настроек...")
     local success, err = pcall(function()
-        local data = Services.HttpService:JSONEncode(CurrentSettings)
-        writefile(SaveSystem.SaveKey, data)
+        local dataToSave = Services.HttpService:JSONEncode(CurrentSettings)
+        writefile(SaveSystem.SaveKey, dataToSave)
     end)
-    if not success then
+    
+    if success then
+        SaveSystem.Log("Настройки успешно сохранены в файл: " .. SaveSystem.SaveKey)
+    else
+        SaveSystem.Log("ОШИБКА сохранения настроек: " .. tostring(err))
         warn("[UIThemeInjector] Ошибка сохранения настроек: " .. tostring(err))
     end
-end,
+end
 
--- И функцию Load:
-Load = function()
+SaveSystem.Load = function()
+    SaveSystem.Log("Попытка загрузки настроек из файла...")
     local success, data = pcall(function()
         if isfile(SaveSystem.SaveKey) then
             local fileContent = readfile(SaveSystem.SaveKey)
-            return Services.HttpService:JSONDecode(fileContent)
+            local decodedData = Services.HttpService:JSONDecode(fileContent)
+            return decodedData
         end
         return nil
     end)
     
-    if success and data then
+    if success and data ~= nil then
+        SaveSystem.Log("Настройки успешно загружены из файла.")
         CurrentSettings = data
         return true
+    else
+        SaveSystem.Log("Файл сохранений не найден или поврежден. Используются настройки по умолчанию.")
+        return false
     end
-    return false
-end,
-    
-    Reset = function()
-        local success = pcall(function()
-            if isfile(SaveSystem.SaveKey) then
-                delfile(SaveSystem.SaveKey)
-            end
-        end)
-        return success
-    end
-}
+end
 
--- // 6. Утилиты для работы с UI
-local UIUtils = {
-    GetDeviceType = function()
+SaveSystem.Reset = function()
+    SaveSystem.Log("Сброс настроек до заводских значений...")
+    local success = pcall(function()
+        if isfile(SaveSystem.SaveKey) then
+            delfile(SaveSystem.SaveKey)
+            SaveSystem.Log("Файл сохранений успешно удален.")
+        end
+    end)
+    return success
+end
+
+-- =========================================================================
+-- 6. УТИЛИТЫ ДЛЯ РАБОТЫ С UI (UIUtils)
+-- =========================================================================
+
+local UIUtils = {}
+
+UIUtils.GetDeviceType = function()
     local camera = Services.Workspace.CurrentCamera
     if not camera then
-        return "Desktop"  -- Возвращаем Desktop по умолчанию, если камера не загружена
+        return "Desktop"
     end
     
     local viewportSize = camera.ViewportSize
@@ -227,374 +371,670 @@ local UIUtils = {
     else
         return "Desktop"
     end
-end,
+end
+
+UIUtils.GetScaleFactor = function()
+    local deviceType = UIUtils.GetDeviceType()
+    if deviceType == "Mobile" then
+        return CurrentSettings.Advanced.Responsive.MobileScale
+    elseif deviceType == "Tablet" then
+        return CurrentSettings.Advanced.Responsive.TabletScale
+    else
+        return CurrentSettings.Advanced.Responsive.DesktopScale
+    end
+end
+
+UIUtils.ApplyGlassmorphism = function(instance, blurSize, transparency)
+    if not CurrentSettings.Advanced.Glassmorphism.Enabled then
+        return
+    end
     
-    GetScaleFactor = function()
-        local deviceType = UIUtils.GetDeviceType()
-        if deviceType == "Mobile" then
-            return CurrentSettings.Advanced.Responsive.MobileScale
-        else
-            return CurrentSettings.Advanced.Responsive.DesktopScale
-        end
-    end,
-    
-    ApplyGlassmorphism = function(instance, blurSize, transparency)
-        if not CurrentSettings.Advanced.Glassmorphism.Enabled then return end
-        
+    local existingBlur = instance:FindFirstChildWhichIsA("BlurEffect")
+    if not existingBlur then
         local blur = Instance.new("BlurEffect")
         blur.Size = blurSize or CurrentSettings.Advanced.Glassmorphism.BlurSize
+        blur.Name = "InjectorBlurEffect"
         blur.Parent = instance
-        
-        instance.BackgroundTransparency = transparency or CurrentSettings.Advanced.Glassmorphism.Transparency
-    end,
+    else
+        existingBlur.Size = blurSize or CurrentSettings.Advanced.Glassmorphism.BlurSize
+    end
     
-    ApplyCornerRadius = function(instance, radius)
+    instance.BackgroundTransparency = transparency or CurrentSettings.Advanced.Glassmorphism.Transparency
+end
+
+UIUtils.ApplyCornerRadius = function(instance, radius)
+    local existingCorner = instance:FindFirstChildWhichIsA("UICorner")
+    if not existingCorner then
         local corner = Instance.new("UICorner")
         corner.CornerRadius = UDim.new(0, radius or CurrentSettings.CoreGui.Chat.CornerRadius)
+        corner.Name = "InjectorUICorner"
         corner.Parent = instance
-    end,
-    
-    ApplyStroke = function(instance, color, thickness)
+    else
+        existingCorner.CornerRadius = UDim.new(0, radius or CurrentSettings.CoreGui.Chat.CornerRadius)
+    end
+end
+
+UIUtils.ApplyStroke = function(instance, color, thickness)
+    local existingStroke = instance:FindFirstChildWhichIsA("UIStroke")
+    if not existingStroke then
         local stroke = Instance.new("UIStroke")
         stroke.Color = color or Color3.fromRGB(60, 60, 70)
         stroke.Thickness = thickness or 1
+        stroke.Name = "InjectorUIStroke"
         stroke.Parent = instance
-    end,
-    
-    CreateTween = function(instance, property, value, duration)
-        if not CurrentSettings.Advanced.Animations.Enabled then
-            instance[property] = value
-            return
-        end
-        
-        local tweenInfo = TweenInfo.new(
-            duration or CurrentSettings.Advanced.Animations.HoverSpeed,
-            Enum.EasingStyle.Quad,
-            Enum.EasingDirection.Out
-        )
-        
-        local tween = Services.TweenService:Create(instance, tweenInfo, {[property] = value})
-        tween:Play()
-        return tween
+    else
+        existingStroke.Color = color or Color3.fromRGB(60, 60, 70)
+        existingStroke.Thickness = thickness or 1
     end
-}
+end
 
--- // 7. Модули кастомизации CoreGui
-local CoreGuiModules = {
-    Chat = {
-        ApplyTheme = function()
-            if not CurrentSettings.CoreGui.Chat.Enabled then return end
-            
-            local chatFrame = PlayerGui:FindFirstChild("Chat")
-            if not chatFrame then return end
-            
-            local mainFrame = chatFrame:FindFirstChild("Frame") or chatFrame:FindFirstChild("ChatFrame")
-            if mainFrame then
-                UIUtils.CreateTween(mainFrame, "BackgroundColor3", CurrentSettings.CoreGui.Chat.BackgroundColor)
-                UIUtils.CreateTween(mainFrame, "BackgroundTransparency", CurrentSettings.CoreGui.Chat.Transparency)
-                
-                if CurrentSettings.Advanced.Glassmorphism.Enabled then
-                    UIUtils.ApplyGlassmorphism(mainFrame)
-                end
-                
-                UIUtils.ApplyCornerRadius(mainFrame, CurrentSettings.CoreGui.Chat.CornerRadius)
-            end
-            
-            local chatMessages = chatFrame:FindFirstChild("ChatMessages") or chatFrame:FindFirstChild("Messages")
-            if chatMessages then
-                for _, label in pairs(chatMessages:GetDescendants()) do
-                    if label:IsA("TextLabel") then
-                        UIUtils.CreateTween(label, "TextColor3", CurrentSettings.CoreGui.Chat.TextColor)
-                    end
-                end
-            end
-        end,
-        
-        Reset = function()
-            local chatFrame = PlayerGui:FindFirstChild("Chat")
-            if chatFrame then
-                local mainFrame = chatFrame:FindFirstChild("Frame") or chatFrame:FindFirstChild("ChatFrame")
-                if mainFrame then
-                    mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                    mainFrame.BackgroundTransparency = 0.5
-                end
-            end
-        end
-    },
-    
-    PlayerList = {
-        ApplyTheme = function()
-            if not CurrentSettings.CoreGui.PlayerList.Enabled then return end
-            
-            local playerList = PlayerGui:FindFirstChild("PlayerList")
-            if not playerList then return end
-            
-            local mainFrame = playerList:FindFirstChild("Frame") or playerList:FindFirstChild("PlayerListFrame")
-            if mainFrame then
-                UIUtils.CreateTween(mainFrame, "BackgroundColor3", CurrentSettings.CoreGui.PlayerList.BackgroundColor)
-                UIUtils.CreateTween(mainFrame, "BackgroundTransparency", CurrentSettings.CoreGui.PlayerList.Transparency)
-                
-                if CurrentSettings.Advanced.Glassmorphism.Enabled then
-                    UIUtils.ApplyGlassmorphism(mainFrame)
-                end
-                
-                UIUtils.ApplyCornerRadius(mainFrame, CurrentSettings.CoreGui.PlayerList.CornerRadius)
-            end
-            
-            for _, label in pairs(playerList:GetDescendants()) do
-                if label:IsA("TextLabel") then
-                    UIUtils.CreateTween(label, "TextColor3", CurrentSettings.CoreGui.PlayerList.TextColor)
-                end
-            end
-        end,
-        
-        Reset = function()
-            local playerList = PlayerGui:FindFirstChild("PlayerList")
-            if playerList then
-                local mainFrame = playerList:FindFirstChild("Frame") or playerList:FindFirstChild("PlayerListFrame")
-                if mainFrame then
-                    mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                    mainFrame.BackgroundTransparency = 0.5
-                end
-            end
-        end
-    },
-    
-    Backpack = {
-        ApplyTheme = function()
-            if not CurrentSettings.CoreGui.Backpack.Enabled then return end
-            
-            local backpack = PlayerGui:FindFirstChild("Backpack")
-            if not backpack then return end
-            
-            local mainFrame = backpack:FindFirstChild("Frame") or backpack:FindFirstChild("BackpackFrame")
-            if mainFrame then
-                UIUtils.CreateTween(mainFrame, "BackgroundColor3", CurrentSettings.CoreGui.Backpack.BackgroundColor)
-                UIUtils.CreateTween(mainFrame, "BackgroundTransparency", CurrentSettings.CoreGui.Backpack.Transparency)
-                
-                if CurrentSettings.Advanced.Glassmorphism.Enabled then
-                    UIUtils.ApplyGlassmorphism(mainFrame)
-                end
-                
-                UIUtils.ApplyCornerRadius(mainFrame, CurrentSettings.CoreGui.Backpack.CornerRadius)
-            end
-        end,
-        
-        Reset = function()
-            local backpack = PlayerGui:FindFirstChild("Backpack")
-            if backpack then
-                local mainFrame = backpack:FindFirstChild("Frame") or backpack:FindFirstChild("BackpackFrame")
-                if mainFrame then
-                    mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-                    mainFrame.BackgroundTransparency = 0.5
-                end
-            end
-        end
-    },
-    
-    HealthBar = {
-        ApplyTheme = function()
-            if not CurrentSettings.CoreGui.HealthBar.Enabled then return end
-            
-            local healthBar = PlayerGui:FindFirstChild("Health")
-            if not healthBar then return end
-            
-            local bar = healthBar:FindFirstChild("Bar") or healthBar:FindFirstChild("HealthBar")
-            if bar then
-                UIUtils.CreateTween(bar, "BackgroundColor3", CurrentSettings.CoreGui.HealthBar.BarColor)
-                UIUtils.CreateTween(bar, "BackgroundTransparency", CurrentSettings.CoreGui.HealthBar.Transparency)
-                UIUtils.ApplyCornerRadius(bar, CurrentSettings.CoreGui.HealthBar.CornerRadius)
-            end
-            
-            local background = healthBar:FindFirstChild("Background") or healthBar:FindFirstChild("Frame")
-            if background then
-                UIUtils.CreateTween(background, "BackgroundColor3", CurrentSettings.CoreGui.HealthBar.BackgroundColor)
-            end
-        end,
-        
-        Reset = function()
-            local healthBar = PlayerGui:FindFirstChild("Health")
-            if healthBar then
-                local bar = healthBar:FindFirstChild("Bar") or healthBar:FindFirstChild("HealthBar")
-                if bar then
-                    bar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-                end
-            end
-        end
-    }
-}
-
--- // 8. Модули кастомизации игровых интерфейсов
-local GameUIModules = {
-    CustomFrames = {
-        ApplyTheme = function()
-            if not CurrentSettings.GameUI.CustomFrames.Enabled then return end
-            if CurrentSettings.GameUI.CustomFrames.TargetFrameName == "" then return end
-            
-            local targetFrame = PlayerGui:FindFirstChild(CurrentSettings.GameUI.CustomFrames.TargetFrameName)
-            if not targetFrame then
-                warn("[UIThemeInjector] Фрейм не найден: " .. CurrentSettings.GameUI.CustomFrames.TargetFrameName)
-                return
-            end
-            
-            UIUtils.CreateTween(targetFrame, "BackgroundColor3", CurrentSettings.GameUI.CustomFrames.BackgroundColor)
-            UIUtils.CreateTween(targetFrame, "BackgroundTransparency", CurrentSettings.GameUI.CustomFrames.Transparency)
-            
-            if CurrentSettings.Advanced.Glassmorphism.Enabled then
-                UIUtils.ApplyGlassmorphism(targetFrame)
-            end
-            
-            UIUtils.ApplyCornerRadius(targetFrame, CurrentSettings.GameUI.CustomFrames.CornerRadius)
-        end,
-        
-        Reset = function()
-            if CurrentSettings.GameUI.CustomFrames.TargetFrameName == "" then return end
-            
-            local targetFrame = PlayerGui:FindFirstChild(CurrentSettings.GameUI.CustomFrames.TargetFrameName)
-            if targetFrame then
-                targetFrame.BackgroundTransparency = 0
-            end
-        end
-    },
-    
-    Buttons = {
-        ApplyTheme = function()
-            if not CurrentSettings.GameUI.Buttons.Enabled then return end
-            
-            for _, screenGui in pairs(PlayerGui:GetChildren()) do
-                for _, button in pairs(screenGui:GetDescendants()) do
-                    if button:IsA("TextButton") or button:IsA("ImageButton") then
-                        UIUtils.CreateTween(button, "BackgroundColor3", CurrentSettings.GameUI.Buttons.BackgroundColor)
-                        UIUtils.ApplyCornerRadius(button, CurrentSettings.GameUI.Buttons.CornerRadius)
-                        
-                        if button:IsA("TextButton") then
-                            UIUtils.CreateTween(button, "TextColor3", CurrentSettings.GameUI.Buttons.TextColor)
-                        end
-                        
-                        button.MouseEnter:Connect(function()
-                            UIUtils.CreateTween(button, "BackgroundColor3", CurrentSettings.GameUI.Buttons.HoverColor)
-                        end)
-                        
-                        button.MouseLeave:Connect(function()
-                            UIUtils.CreateTween(button, "BackgroundColor3", CurrentSettings.GameUI.Buttons.BackgroundColor)
-                        end)
-                    end
-                end
-            end
-        end,
-        
-        Reset = function()
-            for _, screenGui in pairs(PlayerGui:GetChildren()) do
-                for _, button in pairs(screenGui:GetDescendants()) do
-                    if button:IsA("TextButton") or button:IsA("ImageButton") then
-                        button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                    end
-                end
-            end
-        end
-    },
-    
-    Labels = {
-        ApplyTheme = function()
-            if not CurrentSettings.GameUI.Labels.Enabled then return end
-            
-            for _, screenGui in pairs(PlayerGui:GetChildren()) do
-                for _, label in pairs(screenGui:GetDescendants()) do
-                    if label:IsA("TextLabel") then
-                        UIUtils.CreateTween(label, "TextColor3", CurrentSettings.GameUI.Labels.TextColor)
-                        label.Font = CurrentSettings.GameUI.Labels.Font
-                        label.TextSize = CurrentSettings.GameUI.Labels.TextSize
-                    end
-                end
-            end
-        end,
-        
-        Reset = function()
-            for _, screenGui in pairs(PlayerGui:GetChildren()) do
-                for _, label in pairs(screenGui:GetDescendants()) do
-                    if label:IsA("TextLabel") then
-                        label.TextColor3 = Color3.fromRGB(0, 0, 0)
-                        label.Font = Enum.Font.SourceSans
-                        label.TextSize = 14
-                    end
-                end
-            end
-        end
-    }
-}
-
--- // 9. Система применения тем
-local ThemeSystem = {
-    ApplyPreset = function(presetName)
-        local preset = DefaultThemes[presetName]
-        if not preset then
-            warn("[UIThemeInjector] Пресет не найден: " .. presetName)
-            return false
-        end
-        
-        CurrentSettings.ActiveTheme = presetName
-        
-        CurrentSettings.CoreGui.Chat.BackgroundColor = preset.BackgroundColor
-        CurrentSettings.CoreGui.Chat.TextColor = preset.TextColor
-        CurrentSettings.CoreGui.Chat.Transparency = preset.Transparency
-        CurrentSettings.CoreGui.Chat.CornerRadius = preset.CornerRadius
-        
-        CurrentSettings.CoreGui.PlayerList.BackgroundColor = preset.BackgroundColor
-        CurrentSettings.CoreGui.PlayerList.TextColor = preset.TextColor
-        CurrentSettings.CoreGui.PlayerList.Transparency = preset.Transparency
-        CurrentSettings.CoreGui.PlayerList.CornerRadius = preset.CornerRadius
-        
-        CurrentSettings.CoreGui.Backpack.BackgroundColor = preset.BackgroundColor
-        CurrentSettings.CoreGui.Backpack.Transparency = preset.Transparency
-        CurrentSettings.CoreGui.Backpack.CornerRadius = preset.CornerRadius
-        
-        CurrentSettings.CoreGui.HealthBar.BarColor = preset.AccentColor
-        CurrentSettings.CoreGui.HealthBar.BackgroundColor = preset.SecondaryColor
-        CurrentSettings.CoreGui.HealthBar.Transparency = preset.Transparency
-        
-        CurrentSettings.GameUI.CustomFrames.BackgroundColor = preset.BackgroundColor
-        CurrentSettings.GameUI.CustomFrames.Transparency = preset.Transparency
-        CurrentSettings.GameUI.CustomFrames.CornerRadius = preset.CornerRadius
-        
-        CurrentSettings.GameUI.Buttons.BackgroundColor = preset.SecondaryColor
-        CurrentSettings.GameUI.Buttons.HoverColor = preset.BackgroundColor
-        CurrentSettings.GameUI.Buttons.TextColor = preset.TextColor
-        CurrentSettings.GameUI.Buttons.CornerRadius = preset.CornerRadius
-        
-        CurrentSettings.GameUI.Labels.TextColor = preset.TextColor
-        CurrentSettings.GameUI.Labels.Font = preset.Font
-        
-        return true
-    end,
-    
-    ApplyAll = function()
-        CoreGuiModules.Chat.ApplyTheme()
-        CoreGuiModules.PlayerList.ApplyTheme()
-        CoreGuiModules.Backpack.ApplyTheme()
-        CoreGuiModules.HealthBar.ApplyTheme()
-        
-        GameUIModules.CustomFrames.ApplyTheme()
-        GameUIModules.Buttons.ApplyTheme()
-        GameUIModules.Labels.ApplyTheme()
-    end,
-    
-    ResetAll = function()
-        CoreGuiModules.Chat.Reset()
-        CoreGuiModules.PlayerList.Reset()
-        CoreGuiModules.Backpack.Reset()
-        CoreGuiModules.HealthBar.Reset()
-        
-        GameUIModules.CustomFrames.Reset()
-        GameUIModules.Buttons.Reset()
-        GameUIModules.Labels.Reset()
+UIUtils.CreateTween = function(instance, property, value, duration)
+    if not CurrentSettings.Advanced.Animations.Enabled then
+        instance[property] = value
+        return
     end
-}
+    
+    local tweenInfo = TweenInfo.new(
+        duration or CurrentSettings.Advanced.Animations.HoverSpeed,
+        Enum.EasingStyle.Quad,
+        Enum.EasingDirection.Out
+    )
+    
+    local tweenProperties = {}
+    tweenProperties[property] = value
+    
+    local tween = Services.TweenService:Create(instance, tweenInfo, tweenProperties)
+    tween:Play()
+    return tween
+end
 
--- // 10. Создание интерфейса Rayfield
+UIUtils.ApplyFont = function(instance, fontEnum)
+    if instance:IsA("GuiObject") or instance:IsA("TextLabel") or instance:IsA("TextButton") or instance:IsA("TextBox") then
+        instance.Font = fontEnum
+    end
+end
+
+UIUtils.ApplyTextSize = function(instance, size)
+    if instance:IsA("GuiObject") or instance:IsA("TextLabel") or instance:IsA("TextButton") or instance:IsA("TextBox") then
+        instance.TextSize = size
+    end
+end
+
+UIUtils.ApplyTextColor = function(instance, color)
+    if instance:IsA("TextLabel") or instance:IsA("TextButton") or instance:IsA("TextBox") then
+        instance.TextColor3 = color
+    end
+end
+
+UIUtils.ApplyBackgroundColor = function(instance, color)
+    if instance:IsA("GuiObject") then
+        instance.BackgroundColor3 = color
+    end
+end
+
+UIUtils.ApplyBackgroundTransparency = function(instance, transparency)
+    if instance:IsA("GuiObject") then
+        instance.BackgroundTransparency = transparency
+    end
+end
+
+-- =========================================================================
+-- 7. МОДУЛИ КАСТОМИЗАЦИИ COREGUI
+-- =========================================================================
+
+local CoreGuiModules = {}
+
+CoreGuiModules.Chat = {}
+CoreGuiModules.Chat.ApplyTheme = function()
+    if not CurrentSettings.CoreGui.Chat.Enabled then
+        return
+    end
+    
+    local chatFrame = PlayerGui:FindFirstChild("Chat")
+    if not chatFrame then
+        return
+    end
+    
+    local mainFrame = chatFrame:FindFirstChild("Frame") or chatFrame:FindFirstChild("ChatFrame")
+    if mainFrame then
+        UIUtils.CreateTween(mainFrame, "BackgroundColor3", CurrentSettings.CoreGui.Chat.BackgroundColor)
+        UIUtils.CreateTween(mainFrame, "BackgroundTransparency", CurrentSettings.CoreGui.Chat.Transparency)
+        
+        if CurrentSettings.Advanced.Glassmorphism.Enabled then
+            UIUtils.ApplyGlassmorphism(mainFrame)
+        end
+        
+        UIUtils.ApplyCornerRadius(mainFrame, CurrentSettings.CoreGui.Chat.CornerRadius)
+    end
+    
+    local chatMessages = chatFrame:FindFirstChild("ChatMessages") or chatFrame:FindFirstChild("Messages")
+    if chatMessages then
+        for _, descendant in pairs(chatMessages:GetDescendants()) do
+            if descendant:IsA("TextLabel") or descendant:IsA("TextButton") then
+                UIUtils.CreateTween(descendant, "TextColor3", CurrentSettings.CoreGui.Chat.TextColor)
+            end
+        end
+    end
+end
+
+CoreGuiModules.Chat.Reset = function()
+    local chatFrame = PlayerGui:FindFirstChild("Chat")
+    if chatFrame then
+        local mainFrame = chatFrame:FindFirstChild("Frame") or chatFrame:FindFirstChild("ChatFrame")
+        if mainFrame then
+            mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            mainFrame.BackgroundTransparency = 0.5
+            local corner = mainFrame:FindFirstChildWhichIsA("UICorner")
+            if corner then corner:Destroy() end
+        end
+    end
+end
+
+CoreGuiModules.PlayerList = {}
+CoreGuiModules.PlayerList.ApplyTheme = function()
+    if not CurrentSettings.CoreGui.PlayerList.Enabled then
+        return
+    end
+    
+    local playerList = PlayerGui:FindFirstChild("PlayerList")
+    if not playerList then
+        return
+    end
+    
+    local mainFrame = playerList:FindFirstChild("Frame") or playerList:FindFirstChild("PlayerListFrame")
+    if mainFrame then
+        UIUtils.CreateTween(mainFrame, "BackgroundColor3", CurrentSettings.CoreGui.PlayerList.BackgroundColor)
+        UIUtils.CreateTween(mainFrame, "BackgroundTransparency", CurrentSettings.CoreGui.PlayerList.Transparency)
+        
+        if CurrentSettings.Advanced.Glassmorphism.Enabled then
+            UIUtils.ApplyGlassmorphism(mainFrame)
+        end
+        
+        UIUtils.ApplyCornerRadius(mainFrame, CurrentSettings.CoreGui.PlayerList.CornerRadius)
+    end
+    
+    for _, descendant in pairs(playerList:GetDescendants()) do
+        if descendant:IsA("TextLabel") or descendant:IsA("TextButton") then
+            UIUtils.CreateTween(descendant, "TextColor3", CurrentSettings.CoreGui.PlayerList.TextColor)
+        end
+    end
+end
+
+CoreGuiModules.PlayerList.Reset = function()
+    local playerList = PlayerGui:FindFirstChild("PlayerList")
+    if playerList then
+        local mainFrame = playerList:FindFirstChild("Frame") or playerList:FindFirstChild("PlayerListFrame")
+        if mainFrame then
+            mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            mainFrame.BackgroundTransparency = 0.5
+            local corner = mainFrame:FindFirstChildWhichIsA("UICorner")
+            if corner then corner:Destroy() end
+        end
+    end
+end
+
+CoreGuiModules.Backpack = {}
+CoreGuiModules.Backpack.ApplyTheme = function()
+    if not CurrentSettings.CoreGui.Backpack.Enabled then
+        return
+    end
+    
+    local backpack = PlayerGui:FindFirstChild("Backpack")
+    if not backpack then
+        return
+    end
+    
+    local mainFrame = backpack:FindFirstChild("Frame") or backpack:FindFirstChild("BackpackFrame")
+    if mainFrame then
+        UIUtils.CreateTween(mainFrame, "BackgroundColor3", CurrentSettings.CoreGui.Backpack.BackgroundColor)
+        UIUtils.CreateTween(mainFrame, "BackgroundTransparency", CurrentSettings.CoreGui.Backpack.Transparency)
+        
+        if CurrentSettings.Advanced.Glassmorphism.Enabled then
+            UIUtils.ApplyGlassmorphism(mainFrame)
+        end
+        
+        UIUtils.ApplyCornerRadius(mainFrame, CurrentSettings.CoreGui.Backpack.CornerRadius)
+    end
+end
+
+CoreGuiModules.Backpack.Reset = function()
+    local backpack = PlayerGui:FindFirstChild("Backpack")
+    if backpack then
+        local mainFrame = backpack:FindFirstChild("Frame") or backpack:FindFirstChild("BackpackFrame")
+        if mainFrame then
+            mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            mainFrame.BackgroundTransparency = 0.5
+            local corner = mainFrame:FindFirstChildWhichIsA("UICorner")
+            if corner then corner:Destroy() end
+        end
+    end
+end
+
+CoreGuiModules.HealthBar = {}
+CoreGuiModules.HealthBar.ApplyTheme = function()
+    if not CurrentSettings.CoreGui.HealthBar.Enabled then
+        return
+    end
+    
+    local healthBar = PlayerGui:FindFirstChild("Health")
+    if not healthBar then
+        return
+    end
+    
+    local bar = healthBar:FindFirstChild("Bar") or healthBar:FindFirstChild("HealthBar")
+    if bar then
+        UIUtils.CreateTween(bar, "BackgroundColor3", CurrentSettings.CoreGui.HealthBar.BarColor)
+        UIUtils.CreateTween(bar, "BackgroundTransparency", CurrentSettings.CoreGui.HealthBar.Transparency)
+        UIUtils.ApplyCornerRadius(bar, CurrentSettings.CoreGui.HealthBar.CornerRadius)
+    end
+    
+    local background = healthBar:FindFirstChild("Background") or healthBar:FindFirstChild("Frame")
+    if background then
+        UIUtils.CreateTween(background, "BackgroundColor3", CurrentSettings.CoreGui.HealthBar.BackgroundColor)
+    end
+end
+
+CoreGuiModules.HealthBar.Reset = function()
+    local healthBar = PlayerGui:FindFirstChild("Health")
+    if healthBar then
+        local bar = healthBar:FindFirstChild("Bar") or healthBar:FindFirstChild("HealthBar")
+        if bar then
+            bar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            local corner = bar:FindFirstChildWhichIsA("UICorner")
+            if corner then corner:Destroy() end
+        end
+    end
+end
+
+CoreGuiModules.Leaderboard = {}
+CoreGuiModules.Leaderboard.ApplyTheme = function()
+    if not CurrentSettings.CoreGui.Leaderboard.Enabled then
+        return
+    end
+    
+    local leaderboard = PlayerGui:FindFirstChild("Leaderboard")
+    if not leaderboard then
+        return
+    end
+    
+    local mainFrame = leaderboard:FindFirstChild("Frame") or leaderboard:FindFirstChild("LeaderboardFrame")
+    if mainFrame then
+        UIUtils.CreateTween(mainFrame, "BackgroundColor3", CurrentSettings.CoreGui.Leaderboard.BackgroundColor)
+        UIUtils.CreateTween(mainFrame, "BackgroundTransparency", CurrentSettings.CoreGui.Leaderboard.Transparency)
+        UIUtils.ApplyCornerRadius(mainFrame, CurrentSettings.CoreGui.Leaderboard.CornerRadius)
+    end
+    
+    for _, descendant in pairs(leaderboard:GetDescendants()) do
+        if descendant:IsA("TextLabel") then
+            UIUtils.CreateTween(descendant, "TextColor3", CurrentSettings.CoreGui.Leaderboard.TextColor)
+        end
+    end
+end
+
+CoreGuiModules.Leaderboard.Reset = function()
+    local leaderboard = PlayerGui:FindFirstChild("Leaderboard")
+    if leaderboard then
+        local mainFrame = leaderboard:FindFirstChild("Frame") or leaderboard:FindFirstChild("LeaderboardFrame")
+        if mainFrame then
+            mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            mainFrame.BackgroundTransparency = 0.5
+        end
+    end
+end
+
+CoreGuiModules.Notifications = {}
+CoreGuiModules.Notifications.ApplyTheme = function()
+    if not CurrentSettings.CoreGui.Notifications.Enabled then
+        return
+    end
+    
+    local notifications = PlayerGui:FindFirstChild("Notifications")
+    if not notifications then
+        return
+    end
+    
+    for _, descendant in pairs(notifications:GetDescendants()) do
+        if descendant:IsA("Frame") or descendant:IsA("ScrollingFrame") then
+            UIUtils.CreateTween(descendant, "BackgroundColor3", CurrentSettings.CoreGui.Notifications.BackgroundColor)
+            UIUtils.CreateTween(descendant, "BackgroundTransparency", CurrentSettings.CoreGui.Notifications.Transparency)
+            UIUtils.ApplyCornerRadius(descendant, CurrentSettings.CoreGui.Notifications.CornerRadius)
+        elseif descendant:IsA("TextLabel") then
+            UIUtils.CreateTween(descendant, "TextColor3", CurrentSettings.CoreGui.Notifications.TextColor)
+        end
+    end
+end
+
+CoreGuiModules.Notifications.Reset = function()
+    local notifications = PlayerGui:FindFirstChild("Notifications")
+    if notifications then
+        for _, descendant in pairs(notifications:GetDescendants()) do
+            if descendant:IsA("Frame") or descendant:IsA("ScrollingFrame") then
+                descendant.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                descendant.BackgroundTransparency = 0.5
+            end
+        end
+    end
+end
+
+-- =========================================================================
+-- 8. МОДУЛИ КАСТОМИЗАЦИИ ИГРОВЫХ ИНТЕРФЕЙСОВ (GAMEUI)
+-- =========================================================================
+
+local GameUIModules = {}
+
+GameUIModules.CustomFrames = {}
+GameUIModules.CustomFrames.ApplyTheme = function()
+    if not CurrentSettings.GameUI.CustomFrames.Enabled then
+        return
+    end
+    if CurrentSettings.GameUI.CustomFrames.TargetFrameName == "" then
+        return
+    end
+    
+    local targetFrame = PlayerGui:FindFirstChild(CurrentSettings.GameUI.CustomFrames.TargetFrameName)
+    if not targetFrame then
+        SaveSystem.Log("Фрейм не найден: " .. CurrentSettings.GameUI.CustomFrames.TargetFrameName)
+        return
+    end
+    
+    UIUtils.CreateTween(targetFrame, "BackgroundColor3", CurrentSettings.GameUI.CustomFrames.BackgroundColor)
+    UIUtils.CreateTween(targetFrame, "BackgroundTransparency", CurrentSettings.GameUI.CustomFrames.Transparency)
+    
+    if CurrentSettings.Advanced.Glassmorphism.Enabled then
+        UIUtils.ApplyGlassmorphism(targetFrame)
+    end
+    
+    UIUtils.ApplyCornerRadius(targetFrame, CurrentSettings.GameUI.CustomFrames.CornerRadius)
+end
+
+GameUIModules.CustomFrames.Reset = function()
+    if CurrentSettings.GameUI.CustomFrames.TargetFrameName == "" then
+        return
+    end
+    
+    local targetFrame = PlayerGui:FindFirstChild(CurrentSettings.GameUI.CustomFrames.TargetFrameName)
+    if targetFrame then
+        targetFrame.BackgroundTransparency = 0
+        local corner = targetFrame:FindFirstChildWhichIsA("UICorner")
+        if corner then corner:Destroy() end
+    end
+end
+
+GameUIModules.Buttons = {}
+GameUIModules.Buttons.ApplyTheme = function()
+    if not CurrentSettings.GameUI.Buttons.Enabled then
+        return
+    end
+    
+    for _, screenGui in pairs(PlayerGui:GetChildren()) do
+        for _, descendant in pairs(screenGui:GetDescendants()) do
+            if descendant:IsA("TextButton") or descendant:IsA("ImageButton") then
+                UIUtils.CreateTween(descendant, "BackgroundColor3", CurrentSettings.GameUI.Buttons.BackgroundColor)
+                UIUtils.ApplyCornerRadius(descendant, CurrentSettings.GameUI.Buttons.CornerRadius)
+                
+                if descendant:IsA("TextButton") then
+                    UIUtils.CreateTween(descendant, "TextColor3", CurrentSettings.GameUI.Buttons.TextColor)
+                end
+                
+                descendant.MouseEnter:Connect(function()
+                    UIUtils.CreateTween(descendant, "BackgroundColor3", CurrentSettings.GameUI.Buttons.HoverColor)
+                end)
+                
+                descendant.MouseLeave:Connect(function()
+                    UIUtils.CreateTween(descendant, "BackgroundColor3", CurrentSettings.GameUI.Buttons.BackgroundColor)
+                end)
+            end
+        end
+    end
+end
+
+GameUIModules.Buttons.Reset = function()
+    for _, screenGui in pairs(PlayerGui:GetChildren()) do
+        for _, descendant in pairs(screenGui:GetDescendants()) do
+            if descendant:IsA("TextButton") or descendant:IsA("ImageButton") then
+                descendant.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                local corner = descendant:FindFirstChildWhichIsA("UICorner")
+                if corner then corner:Destroy() end
+            end
+        end
+    end
+end
+
+GameUIModules.Labels = {}
+GameUIModules.Labels.ApplyTheme = function()
+    if not CurrentSettings.GameUI.Labels.Enabled then
+        return
+    end
+    
+    for _, screenGui in pairs(PlayerGui:GetChildren()) do
+        for _, descendant in pairs(screenGui:GetDescendants()) do
+            if descendant:IsA("TextLabel") then
+                UIUtils.CreateTween(descendant, "TextColor3", CurrentSettings.GameUI.Labels.TextColor)
+                UIUtils.ApplyFont(descendant, CurrentSettings.GameUI.Labels.Font)
+                UIUtils.ApplyTextSize(descendant, CurrentSettings.GameUI.Labels.TextSize)
+            end
+        end
+    end
+end
+
+GameUIModules.Labels.Reset = function()
+    for _, screenGui in pairs(PlayerGui:GetChildren()) do
+        for _, descendant in pairs(screenGui:GetDescendants()) do
+            if descendant:IsA("TextLabel") then
+                descendant.TextColor3 = Color3.fromRGB(0, 0, 0)
+                descendant.Font = Enum.Font.SourceSans
+                descendant.TextSize = 14
+            end
+        end
+    end
+end
+
+GameUIModules.ImageLabels = {}
+GameUIModules.ImageLabels.ApplyTheme = function()
+    if not CurrentSettings.GameUI.ImageLabels.Enabled then
+        return
+    end
+    
+    for _, screenGui in pairs(PlayerGui:GetChildren()) do
+        for _, descendant in pairs(screenGui:GetDescendants()) do
+            if descendant:IsA("ImageLabel") then
+                UIUtils.ApplyCornerRadius(descendant, CurrentSettings.GameUI.ImageLabels.CornerRadius)
+                if CurrentSettings.GameUI.ImageLabels.BorderThickness > 0 then
+                    UIUtils.ApplyStroke(descendant, CurrentSettings.GameUI.ImageLabels.BorderColor, CurrentSettings.GameUI.ImageLabels.BorderThickness)
+                end
+            end
+        end
+    end
+end
+
+GameUIModules.ImageLabels.Reset = function()
+    for _, screenGui in pairs(PlayerGui:GetChildren()) do
+        for _, descendant in pairs(screenGui:GetDescendants()) do
+            if descendant:IsA("ImageLabel") then
+                local corner = descendant:FindFirstChildWhichIsA("UICorner")
+                if corner then corner:Destroy() end
+                local stroke = descendant:FindFirstChildWhichIsA("UIStroke")
+                if stroke then stroke:Destroy() end
+            end
+        end
+    end
+end
+
+GameUIModules.ScrollFrames = {}
+GameUIModules.ScrollFrames.ApplyTheme = function()
+    if not CurrentSettings.GameUI.ScrollFrames.Enabled then
+        return
+    end
+    
+    for _, screenGui in pairs(PlayerGui:GetChildren()) do
+        for _, descendant in pairs(screenGui:GetDescendants()) do
+            if descendant:IsA("ScrollingFrame") then
+                UIUtils.CreateTween(descendant, "BackgroundColor3", CurrentSettings.GameUI.ScrollFrames.BackgroundColor)
+                UIUtils.CreateTween(descendant, "BackgroundTransparency", CurrentSettings.GameUI.ScrollFrames.Transparency)
+                UIUtils.ApplyCornerRadius(descendant, CurrentSettings.GameUI.ScrollFrames.CornerRadius)
+            end
+        end
+    end
+end
+
+GameUIModules.ScrollFrames.Reset = function()
+    for _, screenGui in pairs(PlayerGui:GetChildren()) do
+        for _, descendant in pairs(screenGui:GetDescendants()) do
+            if descendant:IsA("ScrollingFrame") then
+                descendant.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                descendant.BackgroundTransparency = 1
+                local corner = descendant:FindFirstChildWhichIsA("UICorner")
+                if corner then corner:Destroy() end
+            end
+        end
+    end
+end
+
+GameUIModules.TextBoxes = {}
+GameUIModules.TextBoxes.ApplyTheme = function()
+    if not CurrentSettings.GameUI.TextBoxes.Enabled then
+        return
+    end
+    
+    for _, screenGui in pairs(PlayerGui:GetChildren()) do
+        for _, descendant in pairs(screenGui:GetDescendants()) do
+            if descendant:IsA("TextBox") then
+                UIUtils.CreateTween(descendant, "BackgroundColor3", CurrentSettings.GameUI.TextBoxes.BackgroundColor)
+                UIUtils.CreateTween(descendant, "BackgroundTransparency", CurrentSettings.GameUI.TextBoxes.Transparency)
+                UIUtils.CreateTween(descendant, "TextColor3", CurrentSettings.GameUI.TextBoxes.TextColor)
+                UIUtils.ApplyCornerRadius(descendant, CurrentSettings.GameUI.TextBoxes.CornerRadius)
+            end
+        end
+    end
+end
+
+GameUIModules.TextBoxes.Reset = function()
+    for _, screenGui in pairs(PlayerGui:GetChildren()) do
+        for _, descendant in pairs(screenGui:GetDescendants()) do
+            if descendant:IsA("TextBox") then
+                descendant.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                descendant.BackgroundTransparency = 0
+                descendant.TextColor3 = Color3.fromRGB(0, 0, 0)
+                local corner = descendant:FindFirstChildWhichIsA("UICorner")
+                if corner then corner:Destroy() end
+            end
+        end
+    end
+end
+
+-- =========================================================================
+-- 9. СИСТЕМА ПРИМЕНЕНИЯ ТЕМ (THEMESYSTEM)
+-- =========================================================================
+
+local ThemeSystem = {}
+
+ThemeSystem.ApplyPreset = function(presetName)
+    local preset = DefaultThemes[presetName]
+    if not preset then
+        SaveSystem.Log("Пресет не найден: " .. tostring(presetName))
+        return false
+    end
+    
+    SaveSystem.Log("Применение пресета: " .. preset.Name)
+    CurrentSettings.ActiveTheme = presetName
+    
+    CurrentSettings.CoreGui.Chat.BackgroundColor = preset.BackgroundColor
+    CurrentSettings.CoreGui.Chat.TextColor = preset.TextColor
+    CurrentSettings.CoreGui.Chat.Transparency = preset.Transparency
+    CurrentSettings.CoreGui.Chat.CornerRadius = preset.CornerRadius
+    
+    CurrentSettings.CoreGui.PlayerList.BackgroundColor = preset.BackgroundColor
+    CurrentSettings.CoreGui.PlayerList.TextColor = preset.TextColor
+    CurrentSettings.CoreGui.PlayerList.Transparency = preset.Transparency
+    CurrentSettings.CoreGui.PlayerList.CornerRadius = preset.CornerRadius
+    
+    CurrentSettings.CoreGui.Backpack.BackgroundColor = preset.BackgroundColor
+    CurrentSettings.CoreGui.Backpack.Transparency = preset.Transparency
+    CurrentSettings.CoreGui.Backpack.CornerRadius = preset.CornerRadius
+    
+    CurrentSettings.CoreGui.HealthBar.BarColor = preset.AccentColor
+    CurrentSettings.CoreGui.HealthBar.BackgroundColor = preset.SecondaryColor
+    CurrentSettings.CoreGui.HealthBar.Transparency = preset.Transparency
+    
+    CurrentSettings.CoreGui.Leaderboard.BackgroundColor = preset.BackgroundColor
+    CurrentSettings.CoreGui.Leaderboard.TextColor = preset.TextColor
+    CurrentSettings.CoreGui.Leaderboard.Transparency = preset.Transparency
+    CurrentSettings.CoreGui.Leaderboard.CornerRadius = preset.CornerRadius
+    
+    CurrentSettings.CoreGui.Notifications.BackgroundColor = preset.BackgroundColor
+    CurrentSettings.CoreGui.Notifications.TextColor = preset.TextColor
+    CurrentSettings.CoreGui.Notifications.Transparency = preset.Transparency
+    CurrentSettings.CoreGui.Notifications.CornerRadius = preset.CornerRadius
+    
+    CurrentSettings.GameUI.CustomFrames.BackgroundColor = preset.BackgroundColor
+    CurrentSettings.GameUI.CustomFrames.Transparency = preset.Transparency
+    CurrentSettings.GameUI.CustomFrames.CornerRadius = preset.CornerRadius
+    
+    CurrentSettings.GameUI.Buttons.BackgroundColor = preset.SecondaryColor
+    CurrentSettings.GameUI.Buttons.HoverColor = preset.BackgroundColor
+    CurrentSettings.GameUI.Buttons.TextColor = preset.TextColor
+    CurrentSettings.GameUI.Buttons.CornerRadius = preset.CornerRadius
+    
+    CurrentSettings.GameUI.Labels.TextColor = preset.TextColor
+    CurrentSettings.GameUI.Labels.Font = preset.Font
+    
+    CurrentSettings.GameUI.ImageLabels.BorderColor = preset.AccentColor
+    CurrentSettings.GameUI.ImageLabels.CornerRadius = preset.CornerRadius
+    
+    CurrentSettings.GameUI.ScrollFrames.BackgroundColor = preset.SecondaryColor
+    CurrentSettings.GameUI.ScrollFrames.Transparency = preset.Transparency
+    CurrentSettings.GameUI.ScrollFrames.CornerRadius = preset.CornerRadius
+    
+    CurrentSettings.GameUI.TextBoxes.BackgroundColor = preset.SecondaryColor
+    CurrentSettings.GameUI.TextBoxes.TextColor = preset.TextColor
+    CurrentSettings.GameUI.TextBoxes.Transparency = preset.Transparency
+    CurrentSettings.GameUI.TextBoxes.CornerRadius = preset.CornerRadius
+    
+    return true
+end
+
+ThemeSystem.ApplyAll = function()
+    SaveSystem.Log("Применение всех настроек темы...")
+    CoreGuiModules.Chat.ApplyTheme()
+    CoreGuiModules.PlayerList.ApplyTheme()
+    CoreGuiModules.Backpack.ApplyTheme()
+    CoreGuiModules.HealthBar.ApplyTheme()
+    CoreGuiModules.Leaderboard.ApplyTheme()
+    CoreGuiModules.Notifications.ApplyTheme()
+    
+    GameUIModules.CustomFrames.ApplyTheme()
+    GameUIModules.Buttons.ApplyTheme()
+    GameUIModules.Labels.ApplyTheme()
+    GameUIModules.ImageLabels.ApplyTheme()
+    GameUIModules.ScrollFrames.ApplyTheme()
+    GameUIModules.TextBoxes.ApplyTheme()
+end
+
+ThemeSystem.ResetAll = function()
+    SaveSystem.Log("Сброс всех примененных тем...")
+    CoreGuiModules.Chat.Reset()
+    CoreGuiModules.PlayerList.Reset()
+    CoreGuiModules.Backpack.Reset()
+    CoreGuiModules.HealthBar.Reset()
+    CoreGuiModules.Leaderboard.Reset()
+    CoreGuiModules.Notifications.Reset()
+    
+    GameUIModules.CustomFrames.Reset()
+    GameUIModules.Buttons.Reset()
+    GameUIModules.Labels.Reset()
+    GameUIModules.ImageLabels.Reset()
+    GameUIModules.ScrollFrames.Reset()
+    GameUIModules.TextBoxes.Reset()
+end
+
+-- =========================================================================
+-- 10. ПОСТРОЕНИЕ ИНТЕРФЕЙСА RAYFIELD
+-- =========================================================================
+
 local Window = Rayfield:CreateWindow({
     Name = "UI Theme Injector",
     LoadingTitle = "Загрузка интерфейса...",
-    LoadingSubtitle = "by Winion",
+    LoadingSubtitle = "by Winion (@Winion)",
     ConfigurationSaving = {
         Enabled = true,
         FolderName = "UIThemeInjector",
@@ -606,7 +1046,7 @@ local Window = Rayfield:CreateWindow({
     KeySystem = false
 })
 
--- // 11. Вкладка: Пресеты тем
+-- Вкладка 1: Пресеты тем
 local PresetsTab = Window:CreateTab("Пресеты тем", 4483362458)
 
 local PresetSection = PresetsTab:CreateSection("Выбор готовой темы")
@@ -629,7 +1069,7 @@ for presetName, presetData in pairs(DefaultThemes) do
     })
 end
 
-PresetSection = PresetsTab:CreateSection("Управление")
+local ManagementSection = PresetsTab:CreateSection("Управление")
 
 PresetsTab:CreateButton({
     Name = "Сбросить все настройки",
@@ -658,7 +1098,7 @@ PresetsTab:CreateButton({
     end
 })
 
--- // 12. Вкладка: CoreGui настройки
+-- Вкладка 2: CoreGui настройки
 local CoreGUITab = Window:CreateTab("CoreGui", 4483362458)
 
 local ChatSection = CoreGUITab:CreateSection("Чат")
@@ -880,7 +1320,7 @@ CoreGUITab:CreateColorPicker({
     end
 })
 
--- // 13. Вкладка: Игровые интерфейсы
+-- Вкладка 3: Игровые интерфейсы
 local GameUITab = Window:CreateTab("Игровые UI", 4483362458)
 
 local CustomFramesSection = GameUITab:CreateSection("Кастомные фреймы")
@@ -900,11 +1340,10 @@ GameUITab:CreateToggle({
     end
 })
 
--- СТАЛО (добавлена проверка на nil):
 GameUITab:CreateInput({
     Name = "Имя целевого фрейма",
     CurrentValue = CurrentSettings.GameUI.CustomFrames.TargetFrameName or "",
-    PlaceholderText = "Например: ShopFrame",  -- Изменено с Placeholder на PlaceholderText
+    PlaceholderText = "Например: ShopFrame",
     Flag = "TargetFrameName",
     Callback = function(value)
         CurrentSettings.GameUI.CustomFrames.TargetFrameName = value or ""
@@ -933,7 +1372,7 @@ GameUITab:CreateSlider({
     Flag = "CustomFrameTransparency",
     Callback = function(value)
         CurrentSettings.GameUI.CustomFrames.Transparency = value
-        if CurrentSettings.GameUI.GameUI.CustomFrames.Enabled then
+        if CurrentSettings.GameUI.CustomFrames.Enabled then
             GameUIModules.CustomFrames.ApplyTheme()
         end
         SaveSystem.Save()
@@ -1059,7 +1498,52 @@ GameUITab:CreateSlider({
     end
 })
 
--- // 14. Вкладка: Расширенные настройки
+local ImageLabelsSection = GameUITab:CreateSection("Изображения (ImageLabels)")
+
+GameUITab:CreateToggle({
+    Name = "Включить кастомизацию изображений",
+    CurrentValue = CurrentSettings.GameUI.ImageLabels.Enabled,
+    Flag = "ImageLabelsEnabled",
+    Callback = function(value)
+        CurrentSettings.GameUI.ImageLabels.Enabled = value
+        if value then
+            GameUIModules.ImageLabels.ApplyTheme()
+        else
+            GameUIModules.ImageLabels.Reset()
+        end
+        SaveSystem.Save()
+    end
+})
+
+GameUITab:CreateColorPicker({
+    Name = "Цвет рамки изображения",
+    Color = CurrentSettings.GameUI.ImageLabels.BorderColor,
+    Flag = "ImageLabelBorderColor",
+    Callback = function(color)
+        CurrentSettings.GameUI.ImageLabels.BorderColor = color
+        if CurrentSettings.GameUI.ImageLabels.Enabled then
+            GameUIModules.ImageLabels.ApplyTheme()
+        end
+        SaveSystem.Save()
+    end
+})
+
+GameUITab:CreateSlider({
+    Name = "Толщина рамки изображения",
+    Range = {0, 10},
+    Increment = 1,
+    CurrentValue = CurrentSettings.GameUI.ImageLabels.BorderThickness,
+    Flag = "ImageLabelBorderThickness",
+    Callback = function(value)
+        CurrentSettings.GameUI.ImageLabels.BorderThickness = value
+        if CurrentSettings.GameUI.ImageLabels.Enabled then
+            GameUIModules.ImageLabels.ApplyTheme()
+        end
+        SaveSystem.Save()
+    end
+})
+
+-- Вкладка 4: Расширенные настройки
 local AdvancedTab = Window:CreateTab("Расширенные", 4483362458)
 
 local GlassmorphismSection = AdvancedTab:CreateSection("Эффект стекла (Glassmorphism)")
@@ -1150,6 +1634,18 @@ AdvancedTab:CreateSlider({
 })
 
 AdvancedTab:CreateSlider({
+    Name = "Масштаб для планшетов",
+    Range = {0.5, 1.5},
+    Increment = 0.1,
+    CurrentValue = CurrentSettings.Advanced.Responsive.TabletScale,
+    Flag = "TabletScale",
+    Callback = function(value)
+        CurrentSettings.Advanced.Responsive.TabletScale = value
+        SaveSystem.Save()
+    end
+})
+
+AdvancedTab:CreateSlider({
     Name = "Масштаб для ПК",
     Range = {0.5, 1.5},
     Increment = 0.1,
@@ -1161,7 +1657,19 @@ AdvancedTab:CreateSlider({
     end
 })
 
--- // 15. Вкладка: Информация
+local LoggingSection = AdvancedTab:CreateSection("Логирование")
+
+AdvancedTab:CreateToggle({
+    Name = "Включить логирование в Output",
+    CurrentValue = CurrentSettings.Advanced.Logging.PrintToOutput,
+    Flag = "LoggingEnabled",
+    Callback = function(value)
+        CurrentSettings.Advanced.Logging.PrintToOutput = value
+        SaveSystem.Save()
+    end
+})
+
+-- Вкладка 5: Информация
 local InfoTab = Window:CreateTab("Информация", 4483362458)
 
 local InfoSection = InfoTab:CreateSection("О скрипте")
@@ -1173,12 +1681,12 @@ InfoTab:CreateParagraph({
 
 InfoTab:CreateParagraph({
     Title = "Возможности",
-    Content = "- 5 готовых пресетов тем\n- Детальная настройка цветов и прозрачности\n- Эффект стекла (Glassmorphism)\n- Плавные анимации\n- Адаптация под мобильные устройства\n- Система сохранения настроек\n- Кастомизация игровых интерфейсов"
+    Content = "- 10 готовых пресетов тем\n- Детальная настройка цветов и прозрачности\n- Эффект стекла (Glassmorphism)\n- Плавные анимации\n- Адаптация под мобильные устройства\n- Система сохранения настроек\n- Кастомизация игровых интерфейсов"
 })
 
 InfoTab:CreateParagraph({
     Title = "Автор",
-    Content = "Winion (@Winion)\nВерсия: 1.0\nДата: 2026"
+    Content = "Winion (@Winion)\nВерсия: 2.0.0 (Full Verbose)\nДата: 2026"
 })
 
 InfoTab:CreateParagraph({
@@ -1186,29 +1694,30 @@ InfoTab:CreateParagraph({
     Content = "Текущее устройство: " .. UIUtils.GetDeviceType() .. "\nМасштаб: " .. UIUtils.GetScaleFactor()
 })
 
--- // 16. Инициализация и загрузка сохранений
+-- =========================================================================
+-- 11. ИНИЦИАЛИЗАЦИЯ И ОБРАБОТЧИКИ СОБЫТИЙ
+-- =========================================================================
+
 local function Initialize()
-    print("[UIThemeInjector] Инициализация скрипта...")
+    SaveSystem.Log("Инициализация скрипта UI Theme Injector...")
     
     local loaded = SaveSystem.Load()
     if loaded then
-        print("[UIThemeInjector] Настройки загружены из файла сохранения")
+        SaveSystem.Log("Настройки загружены из файла сохранения.")
         ThemeSystem.ApplyAll()
     else
-        print("[UIThemeInjector] Применение темы по умолчанию")
+        SaveSystem.Log("Применение темы по умолчанию (DarkRed).")
         ThemeSystem.ApplyPreset("DarkRed")
         ThemeSystem.ApplyAll()
     end
     
-    print("[UIThemeInjector] Интерфейс успешно инициализирован")
-    print("[UIThemeInjector] Тип устройства: " .. UIUtils.GetDeviceType())
+    SaveSystem.Log("Интерфейс успешно инициализирован.")
+    SaveSystem.Log("Тип устройства: " .. UIUtils.GetDeviceType())
 end
 
--- Запуск инициализации
 task.spawn(Initialize)
 
--- // 17. Мониторинг изменений в PlayerGui (для динамических интерфейсов)
-if CurrentSettings.GameUI.Buttons.Enabled or CurrentSettings.GameUI.Labels.Enabled then
+if CurrentSettings.GameUI.Buttons.Enabled or CurrentSettings.GameUI.Labels.Enabled or CurrentSettings.GameUI.ImageLabels.Enabled or CurrentSettings.GameUI.ScrollFrames.Enabled or CurrentSettings.GameUI.TextBoxes.Enabled then
     PlayerGui.ChildAdded:Connect(function(child)
         task.wait(0.5)
         if CurrentSettings.GameUI.Buttons.Enabled then
@@ -1217,18 +1726,30 @@ if CurrentSettings.GameUI.Buttons.Enabled or CurrentSettings.GameUI.Labels.Enabl
         if CurrentSettings.GameUI.Labels.Enabled then
             GameUIModules.Labels.ApplyTheme()
         end
+        if CurrentSettings.GameUI.ImageLabels.Enabled then
+            GameUIModules.ImageLabels.ApplyTheme()
+        end
+        if CurrentSettings.GameUI.ScrollFrames.Enabled then
+            GameUIModules.ScrollFrames.ApplyTheme()
+        end
+        if CurrentSettings.GameUI.TextBoxes.Enabled then
+            GameUIModules.TextBoxes.ApplyTheme()
+        end
     end)
 end
 
--- // 18. Обработка изменений размера экрана (адаптивность)
 Services.UserInputService.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         task.wait(0.1)
         if CurrentSettings.Advanced.Responsive.Enabled then
             local newScale = UIUtils.GetScaleFactor()
-            print("[UIThemeInjector] Масштаб обновлен: " .. newScale)
+            SaveSystem.Log("Масштаб обновлен: " .. tostring(newScale))
         end
     end
 end)
 
-print("[UIThemeInjector] Скрипт полностью загружен и готов к работе")
+SaveSystem.Log("Скрипт полностью загружен и готов к работе.")
+
+-- =========================================================================
+-- КОНЕЦ СКРИПТА
+-- =========================================================================
