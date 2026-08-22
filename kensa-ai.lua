@@ -584,7 +584,7 @@ local function CollectGameData()
     gameData.Brightness = Lighting.Brightness
     gameData.Ambient = tostring(Lighting.Ambient)
     gameData.OutdoorAmbient = tostring(Lighting.OutdoorAmbient)
-    gameData.FogEnabled = Lighting.FogEnabled
+    gameData.FogEnabled = Lighting.FogEnd > Lighting.FogStart
     gameData.FogColor = tostring(Lighting.FogColor)
     gameData.FogStart = Lighting.FogStart
     gameData.FogEnd = Lighting.FogEnd
