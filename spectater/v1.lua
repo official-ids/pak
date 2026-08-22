@@ -103,7 +103,7 @@ local ok, err = pcall(function()
 
     local BtnPrev = makeButton("Prev", "<", UDim2.new(0, 45, 0, 40), UDim2.new(0, 8, 0.5, -20), MainFrame)
     local BtnNext = makeButton("Next", ">", UDim2.new(0, 45, 0, 40), UDim2.new(1, -53, 0.5, -20), MainFrame)
-    local BtnClose = makeButton("Close", "✕", UDim2.new(0, 26, 0, 26), UDim2.new(1, -32, 0, 5), MainFrame, Color3.fromRGB(60, 20, 20))
+    local BtnClose = makeButton("Close", "x", UDim2.new(0, 26, 0, 26), UDim2.new(1, -32, 0, 5), MainFrame, Color3.fromRGB(60, 20, 20))
     BtnClose.TextColor3 = Color3.fromRGB(255, 90, 90)
 
     local NameLabel = Instance.new("TextLabel")
