@@ -121,6 +121,7 @@ local ok, err = pcall(function()
     -- ================= ЛОГИКА =================
     local currentIndex = 1
     local spectateList = {}
+    local currentTarget = nil -- Сохраняем ссылку на текущего наблюдаемого игрока
     local isUIOpen = false
 
     local function isAlive(player)
@@ -144,9 +145,16 @@ local ok, err = pcall(function()
     end
 
     local function getCurrentTarget()
+        -- Если у нас есть сохранённый игрок и он всё ещё в списке, используем его
+        if currentTarget and table.find(spectateList, currentTarget) then
+            currentIndex = table.find(spectateList, currentTarget)
+            return currentTarget
+        end
+        -- Иначе берём по индексу
         if #spectateList == 0 then return nil end
         if currentIndex < 1 or currentIndex > #spectateList then currentIndex = 1 end
-        return spectateList[currentIndex]
+        currentTarget = spectateList[currentIndex]
+        return currentTarget
     end
 
     local function focusCameraOnPlayer(player)
@@ -180,7 +188,8 @@ local ok, err = pcall(function()
         currentIndex = currentIndex + direction
         if currentIndex > #spectateList then currentIndex = 1 end
         if currentIndex < 1 then currentIndex = #spectateList end
-        focusCameraOnPlayer(getCurrentTarget())
+        currentTarget = spectateList[currentIndex]
+        focusCameraOnPlayer(currentTarget)
     end
 
     -- Анимация кнопок
