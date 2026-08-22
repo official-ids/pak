@@ -1,245 +1,219 @@
--- Spectate System
+-- Spectate System (MM2 Style)
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 local spectating = nil
-local guiOpen = true
+local playerList = {}
+local currentIndex = 0
 
--- Цветовая схема
+-- Цвета
 local colors = {
-    bg = Color3.fromRGB(22, 22, 30),
-    bgSecondary = Color3.fromRGB(30, 30, 42),
-    accent = Color3.fromRGB(99, 102, 241),
-    accentHover = Color3.fromRGB(129, 132, 251),
-    danger = Color3.fromRGB(239, 68, 68),
+    bg = Color3.fromRGB(0, 0, 0),
+    bgTransparent = Color3.fromRGB(0, 0, 0),
     text = Color3.fromRGB(255, 255, 255),
-    textMuted = Color3.fromRGB(156, 163, 175),
-    border = Color3.fromRGB(55, 55, 75),
-    playerBtn = Color3.fromRGB(40, 40, 55),
-    playerBtnHover = Color3.fromRGB(50, 50, 70),
-    playerSelected = Color3.fromRGB(99, 102, 241)
+    textMuted = Color3.fromRGB(180, 180, 180),
+    button = Color3.fromRGB(40, 40, 40),
+    buttonHover = Color3.fromRGB(60, 60, 60),
+    accent = Color3.fromRGB(255, 255, 255)
 }
 
 -- ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "SpectateSystem"
+ScreenGui.Name = "MM2Spectate"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = PlayerGui
 
--- Кнопка открытия (плавающая, видна когда GUI закрыт)
-local OpenBtn = Instance.new("TextButton")
-OpenBtn.Size = UDim2.new(0, 50, 0, 50)
-OpenBtn.Position = UDim2.new(1, -60, 0.5, -25)
-OpenBtn.BackgroundColor3 = colors.accent
-OpenBtn.BorderSizePixel = 0
-OpenBtn.Text = "S"
-OpenBtn.TextColor3 = colors.text
-OpenBtn.TextSize = 18
-OpenBtn.Font = Enum.Font.GothamBold
-OpenBtn.Visible = false
-OpenBtn.Parent = ScreenGui
-
-Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 10)
-Instance.new("UIStroke", OpenBtn).Color = colors.accentHover
-
-OpenBtn.MouseButton1Click:Connect(function()
-    guiOpen = true
-    MainFrame.Visible = true
-    OpenBtn.Visible = false
-    TweenService:Create(MainFrame, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
-end)
-
--- Основная рамка
+-- Основной контейнер (внизу экрана как в MM2)
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 280, 0, 360)
-MainFrame.Position = UDim2.new(0.5, -140, 0.5, -180)
-MainFrame.BackgroundColor3 = colors.bg
+MainFrame.Size = UDim2.new(0, 400, 0, 80)
+MainFrame.Position = UDim2.new(0.5, -200, 1, -100)
+MainFrame.BackgroundColor3 = colors.bgTransparent
+MainFrame.BackgroundTransparency = 1
 MainFrame.BorderSizePixel = 0
 MainFrame.Parent = ScreenGui
 
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
-local mainStroke = Instance.new("UIStroke", MainFrame)
-mainStroke.Color = colors.border
-mainStroke.Thickness = 1.5
+-- Левая стрелка
+local LeftArrow = Instance.new("TextButton")
+LeftArrow.Size = UDim2.new(0, 50, 0, 50)
+LeftArrow.Position = UDim2.new(0, 0, 0.5, -25)
+LeftArrow.BackgroundColor3 = colors.button
+LeftArrow.BorderSizePixel = 0
+LeftArrow.Text = "<"
+LeftArrow.TextColor3 = colors.text
+LeftArrow.TextSize = 24
+LeftArrow.Font = Enum.Font.GothamBold
+LeftArrow.Visible = false
+LeftArrow.Parent = MainFrame
 
--- Тень (имитация через рамку)
-local shadow = Instance.new("UIStroke", MainFrame)
-shadow.Color = Color3.fromRGB(0, 0, 0)
-shadow.Thickness = 3
-shadow.Transparency = 0.7
+Instance.new("UICorner", LeftArrow).CornerRadius = UDim.new(0, 8)
 
--- Заголовок
-local Header = Instance.new("Frame")
-Header.Size = UDim2.new(1, 0, 0, 45)
-Header.BackgroundColor3 = colors.bgSecondary
-Header.BorderSizePixel = 0
-Header.Parent = MainFrame
-
-Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 12)
-
--- Скрываем нижние скругления заголовка
-local headerFix = Instance.new("Frame")
-headerFix.Size = UDim2.new(1, 0, 0, 12)
-headerFix.Position = UDim2.new(0, 0, 1, -12)
-headerFix.BackgroundColor3 = colors.bgSecondary
-headerFix.BorderSizePixel = 0
-headerFix.Parent = Header
-
-local headerLabel = Instance.new("TextLabel")
-headerLabel.Size = UDim2.new(1, -50, 1, 0)
-headerLabel.Position = UDim2.new(0, 15, 0, 0)
-headerLabel.BackgroundTransparency = 1
-headerLabel.Text = "Spectate"
-headerLabel.TextColor3 = colors.text
-headerLabel.TextSize = 16
-headerLabel.Font = Enum.Font.GothamBold
-headerLabel.TextXAlignment = Enum.TextXAlignment.Left
-headerLabel.Parent = Header
-
--- Индикатор статуса
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, -50, 0, 18)
-statusLabel.Position = UDim2.new(0, 15, 1, -22)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "Not spectating"
-statusLabel.TextColor3 = colors.textMuted
-statusLabel.TextSize = 11
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-statusLabel.Parent = Header
-
--- Кнопка закрытия
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -38, 0, 8)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-CloseBtn.BorderSizePixel = 0
-CloseBtn.Text = "x"
-CloseBtn.TextColor3 = colors.textMuted
-CloseBtn.TextSize = 16
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.Parent = Header
-
-Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
-
-CloseBtn.MouseEnter:Connect(function()
-    CloseBtn.BackgroundColor3 = colors.danger
-    CloseBtn.TextColor3 = colors.text
+LeftArrow.MouseEnter:Connect(function()
+    LeftArrow.BackgroundColor3 = colors.buttonHover
 end)
-CloseBtn.MouseLeave:Connect(function()
-    CloseBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-    CloseBtn.TextColor3 = colors.textMuted
+LeftArrow.MouseLeave:Connect(function()
+    LeftArrow.BackgroundColor3 = colors.button
 end)
 
-CloseBtn.MouseButton1Click:Connect(function()
-    guiOpen = false
-    MainFrame.Visible = false
-    OpenBtn.Visible = true
+-- Правая стрелка
+local RightArrow = Instance.new("TextButton")
+RightArrow.Size = UDim2.new(0, 50, 0, 50)
+RightArrow.Position = UDim2.new(1, -50, 0.5, -25)
+RightArrow.BackgroundColor3 = colors.button
+RightArrow.BorderSizePixel = 0
+RightArrow.Text = ">"
+RightArrow.TextColor3 = colors.text
+RightArrow.TextSize = 24
+RightArrow.Font = Enum.Font.GothamBold
+RightArrow.Visible = false
+RightArrow.Parent = MainFrame
+
+Instance.new("UICorner", RightArrow).CornerRadius = UDim.new(0, 8)
+
+RightArrow.MouseEnter:Connect(function()
+    RightArrow.BackgroundColor3 = colors.buttonHover
+end)
+RightArrow.MouseLeave:Connect(function()
+    RightArrow.BackgroundColor3 = colors.button
 end)
 
--- Список игроков
-local ScrollFrame = Instance.new("ScrollingFrame")
-ScrollFrame.Size = UDim2.new(1, -20, 1, -110)
-ScrollFrame.Position = UDim2.new(0, 10, 0, 55)
-ScrollFrame.BackgroundColor3 = colors.bg
-ScrollFrame.BorderSizePixel = 0
-ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-ScrollFrame.ScrollBarThickness = 4
-ScrollFrame.ScrollBarImageColor3 = colors.accent
-ScrollFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
-ScrollFrame.Parent = MainFrame
+-- Центральная панель с информацией
+local InfoFrame = Instance.new("Frame")
+InfoFrame.Size = UDim2.new(1, -120, 0, 60)
+InfoFrame.Position = UDim2.new(0, 60, 0.5, -30)
+InfoFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+InfoFrame.BackgroundTransparency = 0.3
+InfoFrame.BorderSizePixel = 0
+InfoFrame.Visible = false
+InfoFrame.Parent = MainFrame
 
-Instance.new("UICorner", ScrollFrame).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", InfoFrame).CornerRadius = UDim.new(0, 10)
+Instance.new("UIStroke", InfoFrame).Color = Color3.fromRGB(60, 60, 70)
+Instance.new("UIStroke", InfoFrame).Thickness = 1
 
-local listLayout = Instance.new("UIListLayout", ScrollFrame)
-listLayout.Padding = UDim.new(0, 6)
-listLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+-- DisplayName
+local DisplayNameLabel = Instance.new("TextLabel")
+DisplayNameLabel.Size = UDim2.new(1, 0, 0, 30)
+DisplayNameLabel.Position = UDim2.new(0, 0, 0, 5)
+DisplayNameLabel.BackgroundTransparency = 1
+DisplayNameLabel.Text = "Player Name"
+DisplayNameLabel.TextColor3 = colors.text
+DisplayNameLabel.TextSize = 20
+DisplayNameLabel.Font = Enum.Font.GothamBold
+DisplayNameLabel.Parent = InfoFrame
 
--- Кнопка остановки
-local StopBtn = Instance.new("TextButton")
-StopBtn.Size = UDim2.new(1, -20, 0, 38)
-StopBtn.Position = UDim2.new(0, 10, 1, -48)
-StopBtn.BackgroundColor3 = colors.danger
-StopBtn.BorderSizePixel = 0
-StopBtn.Text = "Stop Spectating"
-StopBtn.TextColor3 = colors.text
-StopBtn.TextSize = 13
-StopBtn.Font = Enum.Font.GothamBold
-StopBtn.Parent = MainFrame
+-- Username
+local UsernameLabel = Instance.new("TextLabel")
+UsernameLabel.Size = UDim2.new(1, 0, 0, 20)
+UsernameLabel.Position = UDim2.new(0, 0, 1, -22)
+UsernameLabel.BackgroundTransparency = 1
+UsernameLabel.Text = "@username"
+UsernameLabel.TextColor3 = colors.textMuted
+UsernameLabel.TextSize = 14
+UsernameLabel.Font = Enum.Font.Gotham
+UsernameLabel.Parent = InfoFrame
 
-Instance.new("UICorner", StopBtn).CornerRadius = UDim.new(0, 8)
+-- Кнопка выхода из spectate
+local ExitButton = Instance.new("TextButton")
+ExitButton.Size = UDim2.new(0, 100, 0, 35)
+ExitButton.Position = UDim2.new(0.5, -50, 1, -45)
+ExitButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+ExitButton.BorderSizePixel = 0
+ExitButton.Text = "Exit Spectate"
+ExitButton.TextColor3 = colors.text
+ExitButton.TextSize = 14
+ExitButton.Font = Enum.Font.GothamBold
+ExitButton.Visible = false
+ExitButton.Parent = ScreenGui
 
-StopBtn.MouseEnter:Connect(function()
-    StopBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+Instance.new("UICorner", ExitButton).CornerRadius = UDim.new(0, 6)
+
+ExitButton.MouseEnter:Connect(function()
+    ExitButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 end)
-StopBtn.MouseLeave:Connect(function()
-    StopBtn.BackgroundColor3 = colors.danger
+ExitButton.MouseLeave:Connect(function()
+    ExitButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
 end)
 
--- Перетаскивание окна
-local dragging = false
-local dragStart, startPos
-
-Header.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = MainFrame.Position
-        
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
+-- Функция обновления списка игроков
+local function updatePlayerList()
+    playerList = {}
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            table.insert(playerList, player)
+        end
     end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(
-            startPos.X.Scale, startPos.X.Offset + delta.X,
-            startPos.Y.Scale, startPos.Y.Offset + delta.Y
-        )
+    
+    if #playerList > 0 and currentIndex == 0 then
+        currentIndex = 1
+    elseif currentIndex > #playerList then
+        currentIndex = #playerList
     end
-end)
-
--- Функция обновления статуса
-local function updateStatus(text)
-    statusLabel.Text = text
 end
 
--- Функция наблюдения
-local function spectatePlayer(player)
-    if not player or player == LocalPlayer then return end
+-- Функция отображения spectate UI
+local function showSpectateUI()
+    if #playerList == 0 then return end
     
+    LeftArrow.Visible = true
+    RightArrow.Visible = true
+    InfoFrame.Visible = true
+    ExitButton.Visible = true
+    
+    updateDisplay()
+end
+
+-- Функция скрытия spectate UI
+local function hideSpectateUI()
+    LeftArrow.Visible = false
+    RightArrow.Visible = false
+    InfoFrame.Visible = false
+    ExitButton.Visible = false
+end
+
+-- Обновление отображения текущего игрока
+local function updateDisplay()
+    if currentIndex < 1 or currentIndex > #playerList then return end
+    
+    local player = playerList[currentIndex]
+    DisplayNameLabel.Text = player.DisplayName
+    UsernameLabel.Text = "@" .. player.Name
+    
+    -- Начинаем наблюдение
     local character = player.Character
-    if not character then return end
-    
-    local humanoid = character:FindFirstChild("Humanoid")
-    local rootPart = character:FindFirstChild("HumanoidRootPart")
-    
-    if not humanoid or not rootPart then
-        updateStatus("Waiting for character...")
-        return
+    if character and character:FindFirstChild("Humanoid") then
+        local camera = workspace.CurrentCamera
+        camera.CameraType = Enum.CameraType.Custom
+        camera.CameraSubject = character:FindFirstChild("Humanoid")
+        spectating = player
     end
-    
-    local camera = workspace.CurrentCamera
-    camera.CameraType = Enum.CameraType.Custom
-    camera.CameraSubject = humanoid
-    
-    spectating = player
-    updateStatus("Spectating: " .. player.Name)
-    refreshList()
 end
 
--- Остановка наблюдения
-local function stopSpectating()
+-- Переключение влево
+LeftArrow.MouseButton1Click:Connect(function()
+    if #playerList == 0 then return end
+    currentIndex = currentIndex - 1
+    if currentIndex < 1 then
+        currentIndex = #playerList
+    end
+    updateDisplay()
+end)
+
+-- Переключение вправо
+RightArrow.MouseButton1Click:Connect(function()
+    if #playerList == 0 then return end
+    currentIndex = currentIndex + 1
+    if currentIndex > #playerList then
+        currentIndex = 1
+    end
+    updateDisplay()
+end)
+
+-- Выход из spectate
+ExitButton.MouseButton1Click:Connect(function()
     local camera = workspace.CurrentCamera
     camera.CameraType = Enum.CameraType.Custom
     
@@ -248,110 +222,40 @@ local function stopSpectating()
     end
     
     spectating = nil
-    updateStatus("Not spectating")
-    refreshList()
-end
+    hideSpectateUI()
+end)
 
--- Обновление списка игроков
-function refreshList()
-    -- Удаляем старые кнопки
-    for _, child in pairs(ScrollFrame:GetChildren()) do
-        if child:IsA("TextButton") then
-            child:Destroy()
-        end
-    end
+-- Горячие клавиши (стрелки на клавиатуре)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
     
-    -- Добавляем игроков
-    local playerCount = 0
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            playerCount = playerCount + 1
-            
-            local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(1, -10, 0, 36)
-            btn.BackgroundColor3 = (spectating == player) and colors.playerSelected or colors.playerBtn
-            btn.BorderSizePixel = 0
-            btn.Text = player.DisplayName
-            btn.TextColor3 = colors.text
-            btn.TextSize = 13
-            btn.Font = Enum.Font.GothamMedium
-            btn.Parent = ScrollFrame
-            
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-            
-            -- Подпись с именем пользователя
-            local nameSub = Instance.new("TextLabel")
-            nameSub.Size = UDim2.new(1, -20, 0, 14)
-            nameSub.Position = UDim2.new(0, 10, 1, -16)
-            nameSub.BackgroundTransparency = 1
-            nameSub.Text = "@" .. player.Name
-            nameSub.TextColor3 = colors.textMuted
-            nameSub.TextSize = 10
-            nameSub.Font = Enum.Font.Gotham
-            nameSub.TextXAlignment = Enum.TextXAlignment.Left
-            nameSub.Parent = btn
-            
-            -- Аватар (инициал)
-            local avatar = Instance.new("TextLabel")
-            avatar.Size = UDim2.new(0, 28, 0, 28)
-            avatar.Position = UDim2.new(0, 8, 0, 4)
-            avatar.BackgroundColor3 = colors.accent
-            avatar.BorderSizePixel = 0
-            avatar.Text = string.sub(player.DisplayName, 1, 1):upper()
-            avatar.TextColor3 = colors.text
-            avatar.TextSize = 14
-            avatar.Font = Enum.Font.GothamBold
-            avatar.Parent = btn
-            
-            Instance.new("UICorner", avatar).CornerRadius = UDim.new(0, 5)
-            
-            -- Смещаем текст вправо
-            btn.Text = ""
-            local displayNameLabel = Instance.new("TextLabel")
-            displayNameLabel.Size = UDim2.new(1, -50, 0, 18)
-            displayNameLabel.Position = UDim2.new(0, 42, 0, 4)
-            displayNameLabel.BackgroundTransparency = 1
-            displayNameLabel.Text = player.DisplayName
-            displayNameLabel.TextColor3 = colors.text
-            displayNameLabel.TextSize = 13
-            displayNameLabel.Font = Enum.Font.GothamMedium
-            displayNameLabel.TextXAlignment = Enum.TextXAlignment.Left
-            displayNameLabel.Parent = btn
-            
-            -- Hover эффекты
-            btn.MouseEnter:Connect(function()
-                if spectating ~= player then
-                    btn.BackgroundColor3 = colors.playerBtnHover
-                end
-            end)
-            btn.MouseLeave:Connect(function()
-                if spectating ~= player then
-                    btn.BackgroundColor3 = colors.playerBtn
-                end
-            end)
-            
-            -- Клик
-            btn.MouseButton1Click:Connect(function()
-                spectatePlayer(player)
-            end)
-        end
+    if input.KeyCode == Enum.KeyCode.Left then
+        LeftArrow.MouseButton1Click:Fire()
+    elseif input.KeyCode == Enum.KeyCode.Right then
+        RightArrow.MouseButton1Click:Fire()
     end
-    
-    if playerCount == 0 then
-        updateStatus("No players to spectate")
+end)
+
+-- Обновление при добавлении/удалении игроков
+Players.PlayerAdded:Connect(function()
+    updatePlayerList()
+    if spectating then
+        showSpectateUI()
     end
-end
+end)
 
--- Обработчики событий
-StopBtn.MouseButton1Click:Connect(stopSpectating)
-
-Players.PlayerAdded:Connect(refreshList)
 Players.PlayerRemoving:Connect(function(player)
+    updatePlayerList()
+    
     if spectating == player then
-        stopSpectating()
+        if #playerList > 0 then
+            currentIndex = math.min(currentIndex, #playerList)
+            updateDisplay()
+        else
+            spectating = nil
+            hideSpectateUI()
+        end
     end
-    task.wait(0.1)
-    refreshList()
 end)
 
 -- Обработка респауна наблюдаемого игрока
@@ -361,12 +265,11 @@ local function onCharacterAdded(character)
         local humanoid = character:FindFirstChild("Humanoid")
         if humanoid then
             workspace.CurrentCamera.CameraSubject = humanoid
-            updateStatus("Spectating: " .. spectating.Name)
         end
     end
 end
 
--- Подписка на респаун всех игроков
+-- Подписка на всех игроков
 local function connectCharacter(player)
     player.CharacterAdded:Connect(onCharacterAdded)
 end
@@ -377,16 +280,21 @@ end
 
 Players.PlayerAdded:Connect(connectCharacter)
 
--- Респаун локального игрока
-LocalPlayer.CharacterAdded:Connect(function()
-    if not spectating then
-        task.wait(0.5)
-        stopSpectating()
-    end
+-- Автоматический показ spectate при смерти локального игрока
+LocalPlayer.CharacterAdded:Connect(function(character)
+    local humanoid = character:WaitForChild("Humanoid")
+    
+    humanoid.Died:Connect(function()
+        task.wait(1)
+        updatePlayerList()
+        if #playerList > 0 then
+            showSpectateUI()
+        end
+    end)
 end)
 
 -- Инициализация
 task.spawn(function()
     task.wait(1)
-    refreshList()
+    updatePlayerList()
 end)
