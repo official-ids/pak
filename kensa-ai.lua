@@ -315,6 +315,14 @@ local function CallMistralAPI(userMessage)
         return "Пожалуйста, введите ваш Mistral API ключ в поле ниже."
     end
     
+    -- Убираем возможные пробелы и переносы строк из ключа
+    local cleanKey = string.gsub(State.APIKey, "%s+", "")
+    
+    -- Проверка формата ключа (ключи Mistral обычно начинаются с букв и цифр, длина ~20-40 символов)
+    if #cleanKey < 10 then
+        return "⚠️ API ключ слишком короткий. Проверьте, что вы скопировали его полностью."
+    end
+    
     -- Сбор контекста
     local context = GetPlayerContext()
     local contextStr = HttpService:JSONEncode(context)
@@ -363,16 +371,21 @@ local function CallMistralAPI(userMessage)
     table.insert(messages, { role = "user", content = userMessage })
     
     local requestBody = {
-        model = CONFIG.MODEL,
+        model = "mistral-small-latest",  -- ИСПРАВЛЕНО: mistral-medium устарел
         messages = messages,
         max_tokens = CONFIG.MAX_TOKENS,
         temperature = CONFIG.TEMPERATURE,
     }
     
+    -- Логируем запрос в консоль экзекютера для диагностики
+    warn("[Kensa AI] Отправка запроса к Mistral API...")
+    warn("[Kensa AI] Модель: mistral-small-latest")
+    warn("[Kensa AI] Длина ключа: " .. #cleanKey)
+    
     local success, response = pcall(function()
         local headers = {
             ["Content-Type"] = "application/json",
-            ["Authorization"] = "Bearer " .. State.APIKey
+            ["Authorization"] = "Bearer " .. cleanKey
         }
         
         local httpResponse = HttpService:PostAsync(
@@ -386,11 +399,65 @@ local function CallMistralAPI(userMessage)
         return HttpService:JSONDecode(httpResponse)
     end)
     
-    if success and response and response.choices and response.choices[1] then
-        return response.choices[1].message.content
-    else
-        return "Ошибка при обращении к API. Проверьте ваш API ключ и попробуйте снова."
+    if not success then
+        -- Детальная диагностика ошибки HTTP
+        local errorMsg = tostring(response)
+        warn("[Kensa AI] ОШИБКА HTTP: " .. errorMsg)
+        
+        if errorMsg:find("401") or errorMsg:find("Unauthorized") then
+            return " Ошибка 401: Неверный API ключ.\n\nПроверьте:\n1. Ключ скопирован полностью\n2. Ключ не отозван в консоли Mistral\n3. Ключ активен"
+        elseif errorMsg:find("403") or errorMsg:find("Forbidden") then
+            return " Ошибка 403: Доступ запрещен.\n\nВозможно, у вашего ключа нет доступа к API или превышен лимит."
+        elseif errorMsg:find("429") or errorMsg:find("Too Many") then
+            return "🔴 Ошибка 429: Слишком много запросов.\n\nПодождите немного и попробуйте снова."
+        elseif errorMsg:find("404") then
+            return "🔴 Ошибка 404: API endpoint не найден.\n\nПроверьте URL API."
+        elseif errorMsg:find("HttpError") or errorMsg:find("HTTP") then
+            return "🔴 Ошибка соединения:\n" .. errorMsg .. "\n\nВозможные причины:\n1. Блокировка HTTP в экзекютере\n2. Проблемы с интернетом\n3. API Mistral недоступен"
+        else
+            return "🔴 Неизвестная ошибка HTTP:\n" .. errorMsg
+        end
     end
+    
+    -- Проверяем структуру ответа
+    if not response then
+        warn("[Kensa AI] Ответ пустой")
+        return "🔴 Пустой ответ от API. Попробуйте позже."
+    end
+    
+    -- Проверяем наличие ошибок в ответе
+    if response.error then
+        local errCode = response.error.code or "unknown"
+        local errMsg = response.error.message or "Неизвестная ошибка"
+        warn("[Kensa AI] Ошибка от API: " .. errCode .. " - " .. errMsg)
+        
+        if errCode == "invalid_api_key" then
+            return "🔴 Неверный API ключ.\n\nПроверьте ключ в https://console.mistral.ai/api-keys"
+        elseif errCode == "model_not_found" then
+            return "🔴 Модель не найдена.\n\nПопробуйте другую модель."
+        elseif errCode == "rate_limit_exceeded" then
+            return "🔴 Превышен лимит запросов.\n\nПодождите и попробуйте снова."
+        else
+            return "🔴 Ошибка API (" .. errCode .. "):\n" .. errMsg
+        end
+    end
+    
+    -- Проверяем наличие choices
+    if not response.choices or #response.choices == 0 then
+        warn("[Kensa AI] Ответ не содержит choices")
+        warn("[Kensa AI] Полный ответ: " .. HttpService:JSONEncode(response))
+        return "🔴 API вернул ответ без содержания.\n\nПроверьте ключ и попробуйте снова."
+    end
+    
+    if response.choices[1] and response.choices[1].message then
+        local content = response.choices[1].message.content
+        warn("[Kensa AI] Успешный ответ получен!")
+        return content
+    end
+    
+    -- Фоллбэк
+    warn("[Kensa AI] Неожиданная структура ответа")
+    return "🔴 Не удалось получить ответ от AI. Попробуйте позже."
 end
 
 -- =====================================================================
