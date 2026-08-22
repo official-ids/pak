@@ -764,14 +764,16 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 -- Обработка клика по виджету через UserInputService
-WidgetFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or 
-       input.UserInputType == Enum.UserInputType.Touch then
-        -- Небольшая задержка чтобы не срабатывало при перетаскивании
-        task.delay(0.1, function()
-            if not widgetDragging then
-                OpenChat()
-            end
+WidgetFrame.MouseButton1Click:Connect(function()
+    if not widgetDragging then
+        -- Открытие чата
+        AppState.IsChatOpen = true
+        ChatWindow.Visible = true
+        WidgetFrame.Visible = false
+        
+        -- Фокус на поле ввода
+        task.delay(0.3, function()
+            MessageInput:CaptureFocus()
         end)
     end
 end)
