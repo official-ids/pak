@@ -154,6 +154,21 @@ local CurrentSettings = {
     }
 }
 
+-- Функция для получения масштаба (вызывается после определения UIUtils)
+local function GetInitialScaleFactor()
+    local success, result = pcall(function()
+        local camera = Services.Workspace.CurrentCamera
+        if not camera then return 1.0 end
+        local viewportSize = camera.ViewportSize
+        if viewportSize.X < 800 then
+            return CurrentSettings.Advanced.Responsive.MobileScale
+        else
+            return CurrentSettings.Advanced.Responsive.DesktopScale
+        end
+    end)
+    return success and result or 1.0
+end
+
 -- // 5. Система сохранения настроек
 local SaveSystem = {
     SaveKey = "UIThemeInjector_Settings_v1",
