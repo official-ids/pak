@@ -110,7 +110,7 @@ StatusLabel.TextSize = 14
 StatusLabel.Font = Enum.Font.GothamMedium
 StatusLabel.Parent = MainFrame
 
--- Функция создания кнопок
+-- Функция создания кнопок (ОБНОВЛЕННАЯ ВЕРСИЯ С АВТО-УДАЛЕНИЕМ)
 local function createButton(name, text, version, yPos)
     local Button = Instance.new("TextButton")
     Button.Name = name
@@ -139,7 +139,7 @@ local function createButton(name, text, version, yPos)
         Stroke.Color = Color3.fromRGB(70, 70, 85)
     end)
 
-    -- Логика нажатия
+    -- Логика нажатия и АВТОМАТИЧЕСКОГО УДАЛЕНИЯ при успехе
     Button.MouseButton1Click:Connect(function()
         Button.Interactable = false -- Блокировка повторных нажатий
         StatusLabel.Text = "⏳ Подключение к GitHub и загрузка..."
@@ -152,21 +152,26 @@ local function createButton(name, text, version, yPos)
 
             if success and type(result) == "string" and #result > 50 then
                 StatusLabel.Text = "⚙️ Компиляция и внедрение кода..."
-                task.wait(0.3) -- Небольшая задержка для визуального восприятия
+                task.wait(0.2) -- Минимальная задержка для плавности UI
                 
                 local execSuccess, execErr = pcall(function()
                     LoadFunction(result)()
                 end)
 
                 if execSuccess then
-                    StatusLabel.Text = "✅ Успешно запущено! Закрываю..."
+                    StatusLabel.Text = "✅ Успешно запущено! Удаляю загрузчик..."
                     StatusLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
-                    task.wait(1.5)
-                    ScreenGui:Destroy()
+                    
+                    -- Гарантированное безопасное удаление загрузчика через 1 секунду
+                    task.delay(1.0, function()
+                        if ScreenGui and ScreenGui.Parent then
+                            ScreenGui:Destroy()
+                        end
+                    end)
                 else
                     StatusLabel.Text = "❌ Ошибка выполнения: " .. tostring(execErr):sub(1, 40) .. "..."
                     StatusLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
-                    Button.Interactable = true
+                    Button.Interactable = true -- Разблокируем кнопку, чтобы можно было повторить попытку
                 end
             else
                 local errMsg = success and "Получен пустой или поврежденный ответ." or tostring(result)
