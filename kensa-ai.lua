@@ -1051,7 +1051,7 @@ local AboutTab = Window:CreateTab("About", 4483362458)
 local ChatSection = ChatTab:CreateSection("Общение с AI")
 
 -- Поле ввода сообщения
-ChatTab:CreateTextBox({
+ChatTab:CreateInput({
     Name = "Введите сообщение",
     PlaceholderText = "Напишите вопрос или команду (/help)",
     Callback = function(Message)
