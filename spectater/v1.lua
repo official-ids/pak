@@ -49,7 +49,7 @@ local ok, err = pcall(function()
     WidgetBtn.TextSize = 24
     WidgetBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     WidgetBtn.BorderSizePixel = 0
-    WidgetBtn.AutoButtonColor = true
+    WidgetBtn.AutoButtonColor = false
     WidgetBtn.Parent = WidgetGui
     
     local wCorner = Instance.new("UICorner", WidgetBtn)
@@ -95,7 +95,7 @@ local ok, err = pcall(function()
         btn.TextScaled = true
         btn.Font = Enum.Font.GothamBold
         btn.BorderSizePixel = 0
-        btn.AutoButtonColor = true
+        btn.AutoButtonColor = false
         btn.Parent = parent
         Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
         return btn
@@ -160,7 +160,7 @@ local ok, err = pcall(function()
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum and Camera then
             Camera.CameraSubject = hum
-            Camera.CameraType = Enum.CameraType.Watch
+            Camera.CameraType = Enum.CameraType.Custom
         end
         NameLabel.Text = "👁️ " .. player.DisplayName .. " (@" .. player.Name .. ")"
     end
