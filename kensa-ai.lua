@@ -652,7 +652,7 @@ local MainScreenGui = CreateUI("ScreenGui", {
 })
 
 -- Создание виджета (кружочек)
-local WidgetFrame = CreateUI("Frame", {
+local WidgetFrame = CreateUI("TextButton", {
     Name = "ChatWidget",
     Size = UDim2.new(0, CONFIG.WIDGET_SIZE, 0, CONFIG.WIDGET_SIZE),
     Position = AppState.WidgetPosition,
