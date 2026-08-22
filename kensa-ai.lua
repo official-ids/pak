@@ -717,26 +717,22 @@ local NotificationCorner = CreateUI("UICorner", {
 })
 
 -- =====================================================================
--- РАЗДЕЛ 9: ЛОГИКА ПЕРЕТАСКИВАНИЯ ВИДЖЕТА
+-- РАЗДЕЛ 9: ЛОГИКА ПЕРЕТАСКИВАНИЯ И КЛИКА ВИДЖЕТА (ИСПРАВЛЕНО)
 -- =====================================================================
 
 local widgetDragging = false
 local widgetDragStart = Vector2.new(0, 0)
 local widgetStartPosition = UDim2.new(0, 0, 0, 0)
+local hasMoved = false -- Флаг: двигали ли мы виджет
 
--- Начало перетаскивания
+-- Начало взаимодействия с виджетом
 WidgetFrame.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or 
        input.UserInputType == Enum.UserInputType.Touch then
         widgetDragging = true
+        hasMoved = false -- Сбрасываем флаг при новом нажатии
         widgetDragStart = input.Position
         widgetStartPosition = WidgetFrame.Position
-        
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                widgetDragging = false
-            end
-        end)
     end
 end)
 
@@ -746,6 +742,11 @@ UserInputService.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or 
            input.UserInputType == Enum.UserInputType.Touch then
             local delta = input.Position - widgetDragStart
+            
+            -- Если сдвинули больше чем на 5 пикселей, считаем это перетаскиванием
+            if delta.Magnitude > 5 then
+                hasMoved = true
+            end
             
             -- Вычисление новой позиции
             local newX = widgetStartPosition.X.Offset + delta.X
@@ -763,18 +764,37 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- Обработка клика по виджету через UserInputService
-WidgetFrame.MouseButton1Click:Connect(function()
-    if not widgetDragging then
-        -- Открытие чата
-        AppState.IsChatOpen = true
-        ChatWindow.Visible = true
-        WidgetFrame.Visible = false
-        
-        -- Фокус на поле ввода
-        task.delay(0.3, function()
-            MessageInput:CaptureFocus()
-        end)
+-- Завершение взаимодействия (отпускание кнопки/пальца)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+       input.UserInputType == Enum.UserInputType.Touch then
+        if widgetDragging then
+            widgetDragging = false
+            
+            -- ЕСЛИ МЫ НЕ ДВИГАЛИ ВИДЖЕТ, ЗНАЧИТ ЭТО БЫЛ КЛИК!
+            if not hasMoved then
+                print("[Kensa AI] Виджет нажат! Открываем чат...") -- Для отладки
+                
+                AppState.IsChatOpen = true
+                ChatWindow.Visible = true
+                WidgetFrame.Visible = false
+                
+                -- Плавное появление (если функция CreateAnimation уже определена)
+                if type(CreateAnimation) == "function" then
+                    ChatWindow.Size = UDim2.new(0, CONFIG.WINDOW_WIDTH * 0.9, 0, CONFIG.WINDOW_HEIGHT * 0.9)
+                    CreateAnimation(ChatWindow, {
+                        Size = UDim2.new(0, CONFIG.WINDOW_WIDTH, 0, CONFIG.WINDOW_HEIGHT),
+                    }, 0.3, Enum.EasingStyle.Back)
+                end
+                
+                -- Фокус на поле ввода
+                task.delay(0.3, function()
+                    if MessageInput then
+                        MessageInput:CaptureFocus()
+                    end
+                end)
+            end
+        end
     end
 end)
 
