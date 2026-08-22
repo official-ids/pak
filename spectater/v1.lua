@@ -185,9 +185,10 @@ local ok, err = pcall(function()
 
     -- Анимация кнопок
     local function animatePress(btn)
-        TweenService:Create(btn, TweenInfo.new(0.1), {Size = UDim2.new(btn.Size.X.Scale, btn.Size.X.Offset - 4, btn.Size.Y.Scale, btn.Size.Y.Offset - 4)}):Play()
+        local originalSize = btn.Size -- Сохраняем исходный размер ДО изменения
+        TweenService:Create(btn, TweenInfo.new(0.1), {Size = UDim2.new(originalSize.X.Scale, originalSize.X.Offset - 4, originalSize.Y.Scale, originalSize.Y.Offset - 4)}):Play()
         task.delay(0.1, function()
-            TweenService:Create(btn, TweenInfo.new(0.1), {Size = btn.Size}):Play()
+            TweenService:Create(btn, TweenInfo.new(0.1), {Size = originalSize}):Play() -- Возвращаем сохраненный исходный размер
         end)
     end
 
