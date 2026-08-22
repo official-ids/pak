@@ -19,6 +19,7 @@ local Services = {
     StarterGui = game:GetService("StarterGui"),
     Lighting = game:GetService("Lighting"),
     RunService = game:GetService("RunService"),
+    Workspace = game:GetService("Workspace"),
     HttpService = game:GetService("HttpService")
 }
 
@@ -198,15 +199,20 @@ end,
 -- // 6. Утилиты для работы с UI
 local UIUtils = {
     GetDeviceType = function()
-        local viewportSize = Services.Workspace.CurrentCamera.ViewportSize
-        if viewportSize.X < 800 then
-            return "Mobile"
-        elseif viewportSize.X < 1200 then
-            return "Tablet"
-        else
-            return "Desktop"
-        end
-    end,
+    local camera = Services.Workspace.CurrentCamera
+    if not camera then
+        return "Desktop"  -- Возвращаем Desktop по умолчанию, если камера не загружена
+    end
+    
+    local viewportSize = camera.ViewportSize
+    if viewportSize.X < 800 then
+        return "Mobile"
+    elseif viewportSize.X < 1200 then
+        return "Tablet"
+    else
+        return "Desktop"
+    end
+end,
     
     GetScaleFactor = function()
         local deviceType = UIUtils.GetDeviceType()
