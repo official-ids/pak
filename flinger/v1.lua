@@ -1,205 +1,184 @@
 --[[
-    Fling Player UI — Tora IsMe Style
-    Работает на Synapse X, Krnl, Script-Ware, Fluxus и др.
+    Fling Player UI - Tora IsMe Style
+    Рабочая версия без эмодзи
 ]]
 
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
--- ===== НАСТРОЙКИ =====
-local UI_CONFIG = {
-    ThemeColor = Color3.fromRGB(179, 136, 255), -- фиолетовый
-    BackgroundTransparency = 0.15,
-    CornerRadius = 12,
-}
-
--- ===== СОЗДАНИЕ ГЛАВНОГО UI =====
+-- ===== СОЗДАНИЕ UI =====
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FlingPlayerUI"
+screenGui.Name = "FlingPlayer"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 screenGui.ResetOnSpawn = false
 
--- ===== ОСНОВНОЙ КОНТЕЙНЕР =====
+-- ===== ОСНОВНОЕ ОКНО =====
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 380, 0, 320)
-mainFrame.Position = UDim2.new(0.5, -190, 0.5, -160)
-mainFrame.BackgroundColor3 = Color3.fromRGB(26, 26, 46)
-mainFrame.BackgroundTransparency = UI_CONFIG.BackgroundTransparency
+mainFrame.Size = UDim2.new(0, 420, 0, 340)
+mainFrame.Position = UDim2.new(0.5, -210, 0.5, -170)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
+mainFrame.BackgroundTransparency = 0.1
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
 mainFrame.Parent = screenGui
 
--- Тень (эффект стекла)
-local shadow = Instance.new("Frame")
-shadow.Size = UDim2.new(1, 0, 1, 0)
-shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-shadow.BackgroundTransparency = 0.5
-shadow.BorderSizePixel = 0
-shadow.Position = UDim2.new(0, 8, 0, 8)
-shadow.Parent = mainFrame
+-- Скругление
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 16)
+mainCorner.Parent = mainFrame
 
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, UI_CONFIG.CornerRadius)
-corner.Parent = mainFrame
-
--- Размытие (Blur) если поддерживается
+-- Размытие (если поддерживается)
 pcall(function()
     local blur = Instance.new("BlurEffect")
-    blur.Size = 20
+    blur.Size = 15
     blur.Parent = mainFrame
 end)
 
--- ===== ШАПКА =====
+-- ===== ЗАГОЛОВОК =====
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 50)
-header.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-header.BackgroundTransparency = 0.3
+header.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+header.BackgroundTransparency = 0.2
 header.BorderSizePixel = 0
 header.Parent = mainFrame
 
 local headerCorner = Instance.new("UICorner")
-headerCorner.CornerRadius = UDim.new(0, UI_CONFIG.CornerRadius)
+headerCorner.CornerRadius = UDim.new(0, 16)
 headerCorner.Parent = header
 
--- Заголовок
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(0.7, 0, 1, 0)
-title.Position = UDim2.new(0.05, 0, 0, 0)
-title.BackgroundTransparency = 1
-title.Text = "🎮 Fling Player"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 18
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Font = Enum.Font.GothamBold
-title.Parent = header
+-- Название
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(0.6, 0, 1, 0)
+titleLabel.Position = UDim2.new(0.05, 0, 0, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "Fling Player"
+titleLabel.TextColor3 = Color3.fromRGB(220, 220, 255)
+titleLabel.TextSize = 18
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.Parent = header
 
--- Версия (бейдж)
-local badge = Instance.new("TextLabel")
-badge.Size = UDim2.new(0, 40, 0, 20)
-badge.Position = UDim2.new(0.45, 0, 0.3, 0)
-badge.BackgroundColor3 = UI_CONFIG.ThemeColor
-badge.BackgroundTransparency = 0.2
-badge.Text = "v1"
-badge.TextColor3 = Color3.fromRGB(255, 255, 255)
-badge.TextSize = 11
-badge.Font = Enum.Font.GothamBold
-badge.TextScaled = true
-badge.BorderSizePixel = 0
-badge.Parent = header
-
-local badgeCorner = Instance.new("UICorner")
-badgeCorner.CornerRadius = UDim.new(1, 0)
-badgeCorner.Parent = badge
-
--- Кнопки управления
+-- Кнопка свернуть
 local collapseBtn = Instance.new("TextButton")
-collapseBtn.Size = UDim2.new(0, 30, 0, 30)
-collapseBtn.Position = UDim2.new(0.86, 0, 0.2, 0)
-collapseBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-collapseBtn.BackgroundTransparency = 0.9
-collapseBtn.Text = "⬇"
+collapseBtn.Size = UDim2.new(0, 32, 0, 32)
+collapseBtn.Position = UDim2.new(0.85, 0, 0.18, 0)
+collapseBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+collapseBtn.BackgroundTransparency = 0.5
+collapseBtn.Text = "-"
 collapseBtn.TextColor3 = Color3.fromRGB(200, 200, 220)
-collapseBtn.TextSize = 18
-collapseBtn.Font = Enum.Font.Gotham
+collapseBtn.TextSize = 22
+collapseBtn.Font = Enum.Font.GothamBold
 collapseBtn.BorderSizePixel = 0
 collapseBtn.Parent = header
 
+local collapseCorner = Instance.new("UICorner")
+collapseCorner.CornerRadius = UDim.new(1, 0)
+collapseCorner.Parent = collapseBtn
+
+-- Кнопка закрыть
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 30, 0, 30)
-closeBtn.Position = UDim2.new(0.93, 0, 0.2, 0)
-closeBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.BackgroundTransparency = 0.9
-closeBtn.Text = "✕"
+closeBtn.Size = UDim2.new(0, 32, 0, 32)
+closeBtn.Position = UDim2.new(0.93, 0, 0.18, 0)
+closeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+closeBtn.BackgroundTransparency = 0.5
+closeBtn.Text = "X"
 closeBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
 closeBtn.TextSize = 18
-closeBtn.Font = Enum.Font.Gotham
+closeBtn.Font = Enum.Font.GothamBold
 closeBtn.BorderSizePixel = 0
 closeBtn.Parent = header
 
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(1, 0)
+closeCorner.Parent = closeBtn
+
 -- ===== ВЫБОР ИГРОКА =====
-local playerFrame = Instance.new("Frame")
-playerFrame.Size = UDim2.new(0.9, 0, 0, 80)
-playerFrame.Position = UDim2.new(0.05, 0, 0.18, 0)
-playerFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-playerFrame.BackgroundTransparency = 0.3
-playerFrame.BorderSizePixel = 0
-playerFrame.Parent = mainFrame
+local selectFrame = Instance.new("Frame")
+selectFrame.Size = UDim2.new(0.9, 0, 0, 85)
+selectFrame.Position = UDim2.new(0.05, 0, 0.17, 0)
+selectFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+selectFrame.BackgroundTransparency = 0.3
+selectFrame.BorderSizePixel = 0
+selectFrame.Parent = mainFrame
 
-local playerCorner = Instance.new("UICorner")
-playerCorner.CornerRadius = UDim.new(0, 8)
-playerCorner.Parent = playerFrame
+local selectCorner = Instance.new("UICorner")
+selectCorner.CornerRadius = UDim.new(0, 10)
+selectCorner.Parent = selectFrame
 
-local label = Instance.new("TextLabel")
-label.Size = UDim2.new(1, 0, 0, 20)
-label.Position = UDim2.new(0.05, 0, 0, 0)
-label.BackgroundTransparency = 1
-label.Text = "ВЫБОР ИГРОКА"
-label.TextColor3 = Color3.fromRGB(136, 136, 170)
-label.TextSize = 11
-label.TextXAlignment = Enum.TextXAlignment.Left
-label.Font = Enum.Font.Gotham
-label.Parent = playerFrame
+-- Лейбл
+local selectLabel = Instance.new("TextLabel")
+selectLabel.Size = UDim2.new(1, 0, 0, 20)
+selectLabel.Position = UDim2.new(0.05, 0, 0.1, 0)
+selectLabel.BackgroundTransparency = 1
+selectLabel.Text = "ВЫБОР ИГРОКА"
+selectLabel.TextColor3 = Color3.fromRGB(130, 130, 180)
+selectLabel.TextSize = 11
+selectLabel.TextXAlignment = Enum.TextXAlignment.Left
+selectLabel.Font = Enum.Font.Gotham
+selectLabel.Parent = selectFrame
 
 -- Поле ввода
-local playerInput = Instance.new("TextBox")
-playerInput.Size = UDim2.new(0.7, 0, 0, 30)
-playerInput.Position = UDim2.new(0.05, 0, 0.4, 0)
-playerInput.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-playerInput.BackgroundTransparency = 0.9
-playerInput.Text = ""
-playerInput.TextColor3 = Color3.fromRGB(240, 240, 255)
-playerInput.TextSize = 14
-playerInput.Font = Enum.Font.Gotham
-playerInput.PlaceholderText = "ID / username / name"
-playerInput.PlaceholderColor3 = Color3.fromRGB(85, 85, 119)
-playerInput.BorderSizePixel = 0
-playerInput.ClipsDescendants = true
-playerInput.Parent = playerFrame
+local inputField = Instance.new("TextBox")
+inputField.Size = UDim2.new(0.7, 0, 0, 30)
+inputField.Position = UDim2.new(0.05, 0, 0.4, 0)
+inputField.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+inputField.BackgroundTransparency = 0.9
+inputField.Text = ""
+inputField.TextColor3 = Color3.fromRGB(230, 230, 255)
+inputField.TextSize = 14
+inputField.Font = Enum.Font.Gotham
+inputField.PlaceholderText = "Введите имя игрока"
+inputField.PlaceholderColor3 = Color3.fromRGB(100, 100, 140)
+inputField.BorderSizePixel = 0
+inputField.ClipsDescendants = true
+inputField.Parent = selectFrame
 
 local inputCorner = Instance.new("UICorner")
 inputCorner.CornerRadius = UDim.new(1, 0)
-inputCorner.Parent = playerInput
+inputCorner.Parent = inputField
 
--- ===== КОНТЕЙНЕР С ИГРОКАМИ (чипы) =====
-local playersContainer = Instance.new("Frame")
-playersContainer.Size = UDim2.new(0.9, 0, 0, 30)
-playersContainer.Position = UDim2.new(0.05, 0, 0.55, 0)
-playersContainer.BackgroundTransparency = 1
-playersContainer.Parent = mainFrame
+-- ===== СПИСОК ИГРОКОВ (чипы) =====
+local chipsContainer = Instance.new("Frame")
+chipsContainer.Size = UDim2.new(0.9, 0, 0, 28)
+chipsContainer.Position = UDim2.new(0.05, 0, 0.68, 0)
+chipsContainer.BackgroundTransparency = 1
+chipsContainer.Parent = mainFrame
 
-local playersList = Instance.new("UIListLayout")
-playersList.FillDirection = Enum.FillDirection.Horizontal
-playersList.HorizontalAlignment = Enum.HorizontalAlignment.Left
-playersList.VerticalAlignment = Enum.VerticalAlignment.Center
-playersList.Padding = UDim.new(0, 6)
-playersList.Parent = playersContainer
+local chipList = Instance.new("UIListLayout")
+chipList.FillDirection = Enum.FillDirection.Horizontal
+chipList.HorizontalAlignment = Enum.HorizontalAlignment.Left
+chipList.VerticalAlignment = Enum.VerticalAlignment.Center
+chipList.Padding = UDim.new(0, 6)
+chipList.Parent = chipsContainer
 
--- Список игроков (можно расширить)
-local playerNames = {"Tora IsMe", "Floppa", "Shinji", "Asuka", "Rei"}
+-- Список игроков
+local playersList = {"Tora IsMe", "Floppa", "Shinji", "Asuka", "Rei"}
 local selectedPlayer = ""
 
--- Создание чипов
-for _, name in ipairs(playerNames) do
+-- Создание кнопок-чипов
+for _, name in ipairs(playersList) do
     local chip = Instance.new("TextButton")
-    chip.Size = UDim2.new(0, 0, 0, 22)
-    chip.BackgroundColor3 = UI_CONFIG.ThemeColor
+    chip.Size = UDim2.new(0, 0, 0, 24)
+    chip.BackgroundColor3 = Color3.fromRGB(179, 136, 255)
     chip.BackgroundTransparency = 0.85
     chip.Text = name
-    chip.TextColor3 = Color3.fromRGB(200, 176, 255)
+    chip.TextColor3 = Color3.fromRGB(200, 180, 255)
     chip.TextSize = 12
     chip.Font = Enum.Font.GothamMedium
     chip.BorderSizePixel = 0
     chip.AutoSizeableX = true
-    chip.Padding = UDim.new(0, 12)
-    chip.Parent = playersContainer
-
+    chip.Padding = UDim.new(0, 14)
+    chip.Parent = chipsContainer
+    
     local chipCorner = Instance.new("UICorner")
     chipCorner.CornerRadius = UDim.new(1, 0)
     chipCorner.Parent = chip
-
+    
     chip.MouseButton1Click:Connect(function()
-        playerInput.Text = name
+        inputField.Text = name
         selectedPlayer = name
         updateStatus(name)
     end)
@@ -208,16 +187,16 @@ end
 -- ===== КНОПКИ ДЕЙСТВИЙ =====
 local actionsFrame = Instance.new("Frame")
 actionsFrame.Size = UDim2.new(0.9, 0, 0, 50)
-actionsFrame.Position = UDim2.new(0.05, 0, 0.58, 0)
+actionsFrame.Position = UDim2.new(0.05, 0, 0.6, 0)
 actionsFrame.BackgroundTransparency = 1
 actionsFrame.Parent = mainFrame
 
--- Fling кнопка
+-- Кнопка Fling
 local flingBtn = Instance.new("TextButton")
-flingBtn.Size = UDim2.new(0.45, 0, 0.8, 0)
+flingBtn.Size = UDim2.new(0.48, 0, 0.8, 0)
 flingBtn.Position = UDim2.new(0, 0, 0.1, 0)
-flingBtn.BackgroundColor3 = UI_CONFIG.ThemeColor
-flingBtn.Text = "🚀 Fling"
+flingBtn.BackgroundColor3 = Color3.fromRGB(179, 136, 255)
+flingBtn.Text = "FLING"
 flingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 flingBtn.TextSize = 16
 flingBtn.Font = Enum.Font.GothamBold
@@ -228,14 +207,14 @@ local flingCorner = Instance.new("UICorner")
 flingCorner.CornerRadius = UDim.new(1, 0)
 flingCorner.Parent = flingBtn
 
--- Stop кнопка
+-- Кнопка Stop
 local stopBtn = Instance.new("TextButton")
-stopBtn.Size = UDim2.new(0.45, 0, 0.8, 0)
-stopBtn.Position = UDim2.new(0.5, 10, 0.1, 0)
+stopBtn.Size = UDim2.new(0.48, 0, 0.8, 0)
+stopBtn.Position = UDim2.new(0.52, 0, 0.1, 0)
 stopBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 stopBtn.BackgroundTransparency = 0.9
-stopBtn.Text = "⏹ Stop"
-stopBtn.TextColor3 = Color3.fromRGB(200, 200, 220)
+stopBtn.Text = "STOP"
+stopBtn.TextColor3 = Color3.fromRGB(200, 200, 230)
 stopBtn.TextSize = 16
 stopBtn.Font = Enum.Font.GothamBold
 stopBtn.BorderSizePixel = 0
@@ -248,129 +227,137 @@ stopCorner.Parent = stopBtn
 -- ===== СТАТУС =====
 local statusFrame = Instance.new("Frame")
 statusFrame.Size = UDim2.new(0.9, 0, 0, 25)
-statusFrame.Position = UDim2.new(0.05, 0, 0.82, 0)
+statusFrame.Position = UDim2.new(0.05, 0, 0.85, 0)
 statusFrame.BackgroundTransparency = 1
 statusFrame.Parent = mainFrame
 
 local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(0.5, 0, 1, 0)
-statusLabel.Position = UDim2.new(0, 0, 0, 0)
+statusLabel.Size = UDim2.new(0.4, 0, 1, 0)
 statusLabel.BackgroundTransparency = 1
 statusLabel.Text = "Текущий:"
-statusLabel.TextColor3 = Color3.fromRGB(102, 102, 170)
+statusLabel.TextColor3 = Color3.fromRGB(130, 130, 180)
 statusLabel.TextSize = 12
 statusLabel.TextXAlignment = Enum.TextXAlignment.Left
 statusLabel.Font = Enum.Font.Gotham
 statusLabel.Parent = statusFrame
 
-local currentPlayerDisplay = Instance.new("TextLabel")
-currentPlayerDisplay.Size = UDim2.new(0.5, 0, 1, 0)
-currentPlayerDisplay.Position = UDim2.new(0.5, 0, 0, 0)
-currentPlayerDisplay.BackgroundTransparency = 1
-currentPlayerDisplay.Text = "не выбран"
-currentPlayerDisplay.TextColor3 = UI_CONFIG.ThemeColor
-currentPlayerDisplay.TextSize = 12
-currentPlayerDisplay.TextXAlignment = Enum.TextXAlignment.Right
-currentPlayerDisplay.Font = Enum.Font.GothamMedium
-currentPlayerDisplay.Parent = statusFrame
+local currentPlayerLabel = Instance.new("TextLabel")
+currentPlayerLabel.Size = UDim2.new(0.6, 0, 1, 0)
+currentPlayerLabel.Position = UDim2.new(0.4, 0, 0, 0)
+currentPlayerLabel.BackgroundTransparency = 1
+currentPlayerLabel.Text = "не выбран"
+currentPlayerLabel.TextColor3 = Color3.fromRGB(179, 136, 255)
+currentPlayerLabel.TextSize = 12
+currentPlayerLabel.TextXAlignment = Enum.TextXAlignment.Right
+currentPlayerLabel.Font = Enum.Font.GothamMedium
+currentPlayerLabel.Parent = statusFrame
 
--- ===== ВИДЖЕТ (свёрнутый) =====
-local widgetFrame = Instance.new("Frame")
-widgetFrame.Name = "Widget"
-widgetFrame.Size = UDim2.new(0, 60, 0, 60)
-widgetFrame.Position = UDim2.new(1, -80, 0.9, 0)
-widgetFrame.BackgroundColor3 = Color3.fromRGB(26, 26, 46)
-widgetFrame.BackgroundTransparency = 0.15
-widgetFrame.BorderSizePixel = 0
-widgetFrame.Visible = false
-widgetFrame.Parent = screenGui
+-- ===== ВИДЖЕТ (свернутый режим) =====
+local widget = Instance.new("Frame")
+widget.Name = "Widget"
+widget.Size = UDim2.new(0, 60, 0, 60)
+widget.Position = UDim2.new(1, -80, 1, -80)
+widget.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
+widget.BackgroundTransparency = 0.15
+widget.BorderSizePixel = 0
+widget.Visible = false
+widget.Parent = screenGui
 
 local widgetCorner = Instance.new("UICorner")
 widgetCorner.CornerRadius = UDim.new(1, 0)
-widgetCorner.Parent = widgetFrame
+widgetCorner.Parent = widget
 
 local widgetIcon = Instance.new("TextLabel")
 widgetIcon.Size = UDim2.new(1, 0, 1, 0)
 widgetIcon.BackgroundTransparency = 1
-widgetIcon.Text = "🎮"
-widgetIcon.TextColor3 = UI_CONFIG.ThemeColor
-widgetIcon.TextSize = 30
-widgetIcon.Font = Enum.Font.Gotham
-widgetIcon.Parent = widgetFrame
+widgetIcon.Text = "F"
+widgetIcon.TextColor3 = Color3.fromRGB(179, 136, 255)
+widgetIcon.TextSize = 28
+widgetIcon.Font = Enum.Font.GothamBold
+widgetIcon.Parent = widget
 
 -- ===== ФУНКЦИИ =====
-local function updateStatus(name)
-    currentPlayerDisplay.Text = name or "не выбран"
+function updateStatus(name)
+    currentPlayerLabel.Text = name or "не выбран"
 end
 
-local function toggleWidget(show)
-    widgetFrame.Visible = show
+function toggleWidget(show)
+    widget.Visible = show
     mainFrame.Visible = not show
 end
 
-local function collapseUI()
+function collapseUI()
     toggleWidget(true)
 end
 
-local function expandUI()
+function expandUI()
     toggleWidget(false)
 end
 
--- ===== ПЕРЕТАСКИВАНИЕ UI =====
-local dragging = false
-local dragInput = nil
-local dragStart = nil
-local startPos = nil
-
-local function updateDrag(input)
-    local delta = input.Position - dragStart
-    local newPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    mainFrame.Position = newPos
-end
+-- ===== ПЕРЕТАСКИВАНИЕ =====
+local dragData = {
+    dragging = false,
+    dragStart = nil,
+    startPos = nil,
+    object = mainFrame
+}
 
 mainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = mainFrame.Position
-        
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragData.dragging = true
+        dragData.dragStart = input.Position
+        dragData.startPos = mainFrame.Position
     end
 end)
 
-mainFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
+UserInputService.InputChanged:Connect(function(input)
+    if dragData.dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragData.dragStart
+        mainFrame.Position = UDim2.new(
+            dragData.startPos.X.Scale,
+            dragData.startPos.X.Offset + delta.X,
+            dragData.startPos.Y.Scale,
+            dragData.startPos.Y.Offset + delta.Y
+        )
     end
 end)
 
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        updateDrag(input)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragData.dragging = false
     end
 end)
 
--- ===== ПЕРЕТАСКИВАНИЕ ВИДЖЕТА =====
-local widgetDragging = false
-local widgetDragStart = nil
-local widgetStartPos = nil
+-- Перетаскивание виджета
+local widgetDragData = {
+    dragging = false,
+    dragStart = nil,
+    startPos = nil
+}
 
-widgetFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        widgetDragging = true
-        widgetDragStart = input.Position
-        widgetStartPos = widgetFrame.Position
+widget.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        widgetDragData.dragging = true
+        widgetDragData.dragStart = input.Position
+        widgetDragData.startPos = widget.Position
     end
 end)
 
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if widgetDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - widgetDragStart
-        widgetFrame.Position = UDim2.new(widgetStartPos.X.Scale, widgetStartPos.X.Offset + delta.X, widgetStartPos.Y.Scale, widgetStartPos.Y.Offset + delta.Y)
+UserInputService.InputChanged:Connect(function(input)
+    if widgetDragData.dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - widgetDragData.dragStart
+        widget.Position = UDim2.new(
+            widgetDragData.startPos.X.Scale,
+            widgetDragData.startPos.X.Offset + delta.X,
+            widgetDragData.startPos.Y.Scale,
+            widgetDragData.startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        widgetDragData.dragging = false
     end
 end)
 
@@ -381,37 +368,38 @@ closeBtn.MouseButton1Click:Connect(function()
     collapseUI()
 end)
 
-widgetFrame.MouseButton1Click:Connect(expandUI)
+widget.MouseButton1Click:Connect(expandUI)
 
--- Выбор игрока (ввод)
-playerInput.FocusLost:Connect(function()
-    local val = playerInput.Text
-    if val ~= "" then
-        selectedPlayer = val
-        updateStatus(val)
+-- Выбор игрока из поля ввода
+inputField.FocusLost:Connect(function()
+    local text = inputField.Text
+    if text ~= "" then
+        selectedPlayer = text
+        updateStatus(text)
     end
 end)
 
 -- Fling
 flingBtn.MouseButton1Click:Connect(function()
     if selectedPlayer == "" then
-        currentPlayerDisplay.Text = "⚠️ выбери игрока!"
-        wait(1)
-        updateStatus(selectedPlayer or "не выбран")
+        currentPlayerLabel.Text = "ВЫБЕРИ ИГРОКА!"
+        currentPlayerLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+        task.wait(1)
+        currentPlayerLabel.Text = selectedPlayer or "не выбран"
+        currentPlayerLabel.TextColor3 = Color3.fromRGB(179, 136, 255)
         return
     end
     
-    -- Анимация нажатия
-    flingBtn.Size = UDim2.new(0.42, 0, 0.75, 0)
-    wait(0.1)
-    flingBtn.Size = UDim2.new(0.45, 0, 0.8, 0)
+    -- Анимация
+    flingBtn.BackgroundColor3 = Color3.fromRGB(150, 100, 230)
+    task.wait(0.1)
+    flingBtn.BackgroundColor3 = Color3.fromRGB(179, 136, 255)
     
-    -- ЛОГИКА ФЛИНГА
-    print("[Fling] 🚀 Fling на " .. selectedPlayer)
-    currentPlayerDisplay.Text = "➜ " .. selectedPlayer .. " (fling!)"
-    currentPlayerDisplay.TextColor3 = Color3.fromRGB(255, 200, 100)
+    print("[Fling] FLING on " .. selectedPlayer)
+    currentPlayerLabel.Text = "FLING: " .. selectedPlayer
+    currentPlayerLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
     
-    -- Найди игрока по имени
+    -- Найти игрока
     local target = nil
     for _, plr in ipairs(game.Players:GetPlayers()) do
         if plr.Name == selectedPlayer or plr.DisplayName == selectedPlayer then
@@ -420,43 +408,50 @@ flingBtn.MouseButton1Click:Connect(function()
         end
     end
     
-    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = target.Character.HumanoidRootPart
-        local velocity = Vector3.new(math.random(-50, 50), math.random(80, 120), math.random(-50, 50))
-        hrp.Velocity = velocity
-        hrp:BreakJoints() -- дополнительный эффект
+    if target and target.Character then
+        local hrp = target.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            hrp.Velocity = Vector3.new(
+                math.random(-60, 60),
+                math.random(100, 150),
+                math.random(-60, 60)
+            )
+        end
     end
     
-    wait(0.8)
-    currentPlayerDisplay.Text = selectedPlayer
-    currentPlayerDisplay.TextColor3 = UI_CONFIG.ThemeColor
+    task.wait(1)
+    currentPlayerLabel.Text = selectedPlayer
+    currentPlayerLabel.TextColor3 = Color3.fromRGB(179, 136, 255)
 end)
 
 -- Stop
 stopBtn.MouseButton1Click:Connect(function()
-    stopBtn.Size = UDim2.new(0.42, 0, 0.75, 0)
-    wait(0.1)
-    stopBtn.Size = UDim2.new(0.45, 0, 0.8, 0)
+    stopBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
+    task.wait(0.1)
+    stopBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    stopBtn.BackgroundTransparency = 0.9
     
-    print("[Fling] ⏹ Stop Fling")
-    currentPlayerDisplay.Text = "⏹ " .. (selectedPlayer or "стоп")
-    currentPlayerDisplay.TextColor3 = Color3.fromRGB(255, 100, 100)
+    print("[Fling] STOP")
+    currentPlayerLabel.Text = "STOPPED"
+    currentPlayerLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
     
-    -- Остановить всех игроков
+    -- Остановить всех
     for _, plr in ipairs(game.Players:GetPlayers()) do
-        if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            plr.Character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+        if plr.Character then
+            local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                hrp.Velocity = Vector3.new(0, 0, 0)
+            end
         end
     end
     
-    wait(0.6)
-    currentPlayerDisplay.Text = selectedPlayer or "не выбран"
-    currentPlayerDisplay.TextColor3 = UI_CONFIG.ThemeColor
+    task.wait(0.6)
+    currentPlayerLabel.Text = selectedPlayer or "не выбран"
+    currentPlayerLabel.TextColor3 = Color3.fromRGB(179, 136, 255)
 end)
 
--- ===== ОТКРЫТИЕ ПО КОМАНДЕ =====
--- Можно открыть через /fling
-game:GetService("Players").LocalPlayer.Chatted:Connect(function(msg)
+-- ===== КОМАНДА ДЛЯ ОТКРЫТИЯ =====
+player.Chatted:Connect(function(msg)
     if msg == "/fling" then
         if mainFrame.Visible then
             collapseUI()
@@ -466,6 +461,6 @@ game:GetService("Players").LocalPlayer.Chatted:Connect(function(msg)
     end
 end)
 
--- ===== ИНИЦИАЛИЗАЦИЯ =====
-print("🎮 Fling Player загружен! Используй /fling для открытия.")
-expandUI() -- Показать UI при старте
+-- ===== ЗАПУСК =====
+expandUI()
+print("Fling Player loaded! Use /fling to toggle.")
